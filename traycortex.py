@@ -2,17 +2,22 @@ import pystray
 from PIL import Image
 import threading
 import time
+import queue
 
 run_checker = True
+run_runner = True
 image = Image.open("borgmatic.png")
 image_i = Image.open("borgmatic_i.png")
+image_i_r = Image.open("borgmatic_i_r.png")
 
 def after_click(icon, query):
     global run_checker
-    if str(query) == "Run Borgmatic":
-        print("Running borgmatic...")
-    elif str(query) == "Exit":
+    global run_runner
+    if str(query) == "Engage":
+        runq.put("True")
+    elif str(query) == "Discard":
         run_checker = False
+        run_runner = False
         icon.stop()
 
 
@@ -30,20 +35,30 @@ def ch_icon(icon, query):
 def check_borgmatic():
     while run_checker:
         time.sleep(1)
-        if icon.icon == image:
-            icon.icon = image_i
-            continue
-        if icon.icon == image_i:
-            icon.icon = image
+
+def run_borgmatic():
+    while run_runner:
+        runq.get()
+        icon.icon = image_i_r
+        icon.title = "Running"
+        print("Running borgmatic...")
+        time.sleep(5)
+        print("Done.")
+        icon.icon = image_i
+        icon.title = "Idle"
 
 
 icon = pystray.Icon("bmsystray", image_i, "Borgmatic", menu=pystray.Menu(
-    pystray.MenuItem("Run Borgmatic", after_click),
+    pystray.MenuItem("Engage", after_click),
     pystray.MenuItem("Notify", notif),
     pystray.MenuItem("Icon Black", ch_icon),
     pystray.MenuItem("Icon White", ch_icon),
-    pystray.MenuItem("Exit", after_click)))
+    pystray.MenuItem("Discard", after_click)))
 
 checker = threading.Thread(target=check_borgmatic)
 checker.start()
+
+runq = queue.Queue()
+runner = threading.Thread(target=run_borgmatic)
+runner.start()
 icon.run()

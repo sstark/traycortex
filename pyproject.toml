@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bmsystray"
+name = "traycortex"
 version = "0.1.0"
 description = "borgmatic systray icon"
 authors = ["Sebastian Stark <sstark@mailbox.org>"]
