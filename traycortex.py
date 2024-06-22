@@ -37,8 +37,8 @@ def check_borgmatic():
 def run_borgmatic():
     while run_runner:
         runq.get()
-        icon.notify("Starting backup")
         icon.icon = image_i_r
+        icon.notify("Commencing backup...")
         print("Running borgmatic...")
         time.sleep(5)
         print("Done.")
