@@ -38,12 +38,13 @@ def create_menu(runq: queue.Queue) -> pystray.Menu:
 
 def menu_click(runq: queue.Queue) -> Callable:
 
-    def _menu_click(icon: pystray.Icon, query: str):
+    def _menu_click(icon: pystray.Icon, query: pystray.MenuItem):
         global run_checker
         global run_runner
-        if query == "Engage":
+        if str(query) == "Engage":
+            print("runq put")
             runq.put(True)
-        elif query == "Discard":
+        elif str(query) == "Discard":
             run_checker = False
             run_runner = False
             runq.put(False)
