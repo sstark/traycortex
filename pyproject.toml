@@ -13,6 +13,9 @@ pillow = "^10.3.0"
 pygobject = "^3.48.2"
 
 
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.10.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
