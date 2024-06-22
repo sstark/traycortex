@@ -16,3 +16,7 @@ pygobject = "^3.48.2"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+traycortex = "traycortex.tray:app"
