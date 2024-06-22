@@ -10,6 +10,13 @@ image = Image.open("borgmatic.png")
 image_i = Image.open("borgmatic_i.png")
 image_i_r = Image.open("borgmatic_i_r.png")
 
+def create_menu() -> Menu:
+    return Menu(
+        MenuItem("Engage", menu_click),
+        MenuItem("Discard", menu_click)
+    )
+
+
 def menu_click(icon, query):
     global run_checker
     global run_runner
@@ -22,12 +29,12 @@ def menu_click(icon, query):
         icon.stop()
 
 
-def check_borgmatic():
+def borgmatic_checker():
     while run_checker:
-        time.sleep(1)
+        time.sleep(0.5)
 
 
-def run_borgmatic():
+def borgmatic_runner():
     while run_runner:
         if runq.get():
             icon.icon = image_i_r
@@ -39,19 +46,12 @@ def run_borgmatic():
             icon.notify("Finished backup")
 
 
-def create_menu() -> Menu:
-    return Menu(
-        MenuItem("Engage", menu_click),
-        MenuItem("Discard", menu_click)
-    )
-
-
 icon = Icon("traycortex", image_i, "Borgmatic", menu=create_menu())
 
-checker = threading.Thread(target=check_borgmatic)
+checker = threading.Thread(target=borgmatic_checker)
 checker.start()
 
 runq = queue.Queue()
-runner = threading.Thread(target=run_borgmatic)
+runner = threading.Thread(target=borgmatic_runner)
 runner.start()
 icon.run()
