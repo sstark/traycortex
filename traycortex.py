@@ -1,4 +1,4 @@
-import pystray
+from pystray import Menu, MenuItem, Icon
 from PIL import Image
 import threading
 import time
@@ -10,23 +10,16 @@ image = Image.open("borgmatic.png")
 image_i = Image.open("borgmatic_i.png")
 image_i_r = Image.open("borgmatic_i_r.png")
 
-def after_click(icon, query):
+def menu_click(icon, query):
     global run_checker
     global run_runner
-    if str(query) == "Icon Black":
-        icon.icon = image
-    elif str(query) == "Icon White":
-        icon.icon = image_i
-    elif str(query) == "Engage":
-        runq.put("True")
+    if str(query) == "Engage":
+        runq.put(True)
     elif str(query) == "Discard":
         run_checker = False
         run_runner = False
+        runq.put(False)
         icon.stop()
-
-
-def notif(icon, _):
-    icon.notify("bla")
 
 
 def check_borgmatic():
@@ -36,22 +29,24 @@ def check_borgmatic():
 
 def run_borgmatic():
     while run_runner:
-        runq.get()
-        icon.icon = image_i_r
-        icon.notify("Commencing backup...")
-        print("Running borgmatic...")
-        time.sleep(5)
-        print("Done.")
-        icon.icon = image_i
-        icon.notify("Finished backup")
+        if runq.get():
+            icon.icon = image_i_r
+            icon.notify("Commencing backup...")
+            print("Running borgmatic...")
+            time.sleep(5)
+            print("Done.")
+            icon.icon = image_i
+            icon.notify("Finished backup")
 
 
-icon = pystray.Icon("bmsystray", image_i, "Borgmatic", menu=pystray.Menu(
-    pystray.MenuItem("Engage", after_click),
-    pystray.MenuItem("Notify", notif),
-    pystray.MenuItem("Icon Black", after_click),
-    pystray.MenuItem("Icon White", after_click),
-    pystray.MenuItem("Discard", after_click)))
+def create_menu() -> Menu:
+    return Menu(
+        MenuItem("Engage", menu_click),
+        MenuItem("Discard", menu_click)
+    )
+
+
+icon = Icon("traycortex", image_i, "Borgmatic", menu=create_menu())
 
 checker = threading.Thread(target=check_borgmatic)
 checker.start()
