@@ -5,7 +5,7 @@ import threading
 import time
 import queue
 from importlib import resources
-from traycortex import images
+import traycortex.images
 
 p_name = __package__ or __name__
 title = "Borgmatic"
@@ -13,7 +13,7 @@ run_checker = True
 run_runner = True
 darkmode = True
 
-res = resources.files(images)
+res = resources.files(traycortex.images)
 # standard image and image while running
 image = Image.open(res / "borgmatic.png")
 image_r = Image.open(res / "borgmatic.png")
