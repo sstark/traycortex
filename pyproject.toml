@@ -3,7 +3,7 @@ name = "traycortex"
 version = "0.1.0"
 description = "borgmatic systray icon"
 authors = ["Sebastian Stark <sstark@mailbox.org>"]
-license = "GPLv3"
+license = "GPL-3.0-only"
 readme = "README.md"
 
 [tool.poetry.dependencies]
