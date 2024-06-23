@@ -5,6 +5,7 @@ import argparse
 from traycortex.config import Config
 from traycortex.config import ConfigError
 from traycortex.log import err, debug
+import traycortex.log
 
 
 def send_msg(msg: str, c: Config, port: int = defaults.DEFAULT_PORT):
@@ -22,6 +23,9 @@ def createArgumentParser() -> argparse.ArgumentParser:
         prog=defaults.CLIENT_NAME, description="Tray icon for borgmatic (client)"
     )
     parser.add_argument(
+        "-d", "--debug", action="store_true", help="Enable debug output"
+    )
+    parser.add_argument(
         "-c", "--config", help=f"{defaults.CLIENT_NAME} configuration file"
     )
     parser.add_argument(
@@ -36,6 +40,7 @@ def createArgumentParser() -> argparse.ArgumentParser:
 
 def cli() -> int:
     args = createArgumentParser().parse_args()
+    traycortex.log.DEBUG = args.debug
 
     if args.ini:
         try:

@@ -10,6 +10,7 @@ from multiprocessing.connection import Listener
 from multiprocessing.context import AuthenticationError
 from traycortex.client import close_checker
 from traycortex import defaults
+import traycortex.log
 from traycortex.log import debug, notice, err
 from traycortex.config import ConfigError, Config
 import argparse
@@ -111,9 +112,13 @@ def app() -> int:
         prog=defaults.APP_NAME, description="Tray icon for borgmatic"
     )
     parser.add_argument(
+        "-d", "--debug", action="store_true", help="Enable debug output"
+    )
+    parser.add_argument(
         "-c", "--config", help=f"{defaults.APP_NAME} configuration file"
     )
     args = parser.parse_args()
+    traycortex.log.DEBUG = args.debug
     try:
         if args.config:
             c = Config(args.config)
