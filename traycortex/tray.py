@@ -10,6 +10,9 @@ from multiprocessing.connection import Listener
 from traycortex.client import close_checker
 from traycortex import defaults
 from traycortex.log import debug, notice
+from traycortex.config import ConfigError, Config
+import argparse
+import sys
 
 title = "Borgmatic"
 darkmode = True
@@ -98,6 +101,21 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
 
 
 def app():
+    parser = argparse.ArgumentParser(
+        prog=defaults.APP_NAME, description="Tray icon for borgmatic"
+    )
+    parser.add_argument(
+        "-c", "--config", help=f"{defaults.APP_NAME} configuration file"
+    )
+    args = parser.parse_args()
+    try:
+        if args.config:
+            c = Config(args.config)
+        else:
+            c = Config.findConfig()
+    except ConfigError:
+        sys.exit(1)
+    print(c)
     runq = queue.Queue()
     icon = pystray.Icon(defaults.APP_NAME, get_image(), title, menu=create_menu(runq))
     checker = threading.Thread(target=borgmatic_checker(icon))

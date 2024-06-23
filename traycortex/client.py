@@ -18,7 +18,7 @@ def close_checker():
 
 def cli():
     parser = argparse.ArgumentParser(
-        prog=defaults.CLIENT_NAME, description="Tray icon for borgmatic"
+        prog=defaults.CLIENT_NAME, description="Tray icon for borgmatic (client)"
     )
     parser.add_argument(
         "-c", "--config", help=f"{defaults.CLIENT_NAME} configuration file"
