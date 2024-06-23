@@ -33,7 +33,7 @@ def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
 def create_menu(runq: queue.Queue) -> pystray.Menu:
     return pystray.Menu(
         pystray.MenuItem("Engage", menu_click(runq)),
-        pystray.MenuItem("Discard", menu_click(runq))
+        pystray.MenuItem("Discard", menu_click(runq)),
     )
 
 
@@ -49,6 +49,7 @@ def menu_click(runq: queue.Queue) -> Callable:
             close_checker()
             runq.put(False)
             icon.stop()
+
     return _menu_click
 
 
@@ -73,6 +74,7 @@ def borgmatic_checker(icon: pystray.Icon, port: int = defaults.DEFAULT_PORT):
                 break
         listener.close()
         notice("stop listening")
+
     return _borgmatic_checker
 
 
@@ -91,6 +93,7 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
             else:
                 debug("runq is false")
                 break
+
     return _borgmatic_runner
 
 
