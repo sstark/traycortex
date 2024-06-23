@@ -1,6 +1,6 @@
 
 MAKEFLAGS += --no-print-directory
-PROGRAM := traycotrex
+PROGRAM := traycortex
 PROGRAM_FULLPATH := $(shell which $(PROGRAM) 2>/dev/null)
 DEBUG_PORT = 5678
 VERBOSE =
