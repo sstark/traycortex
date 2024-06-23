@@ -11,6 +11,7 @@ python = "^3.12"
 pystray = "^0.19.5"
 pillow = "^10.3.0"
 pygobject = "^3.48.2"
+platformdirs = "^4.2.2"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -2,6 +2,7 @@ from platformdirs import user_config_path
 from pathlib import Path
 from configparser import ConfigParser
 from traycortex import defaults
+from traycortex.log import debug
 
 class Config:
 
@@ -24,6 +25,5 @@ class Config:
     @classmethod
     def findConfig(cls) -> "Config":
         configfile = user_config_path(defaults.CONFIG_NAME)
-        print(configfile)
+        debug(configfile)
         return cls(configfile)
-

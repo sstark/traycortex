@@ -9,8 +9,8 @@ import traycortex.images
 from multiprocessing.connection import Listener
 from traycortex.client import close_checker
 from traycortex import defaults
+from traycortex.log import debug, notice
 
-p_name = __package__ or __name__
 title = "Borgmatic"
 darkmode = True
 
@@ -43,7 +43,7 @@ def menu_click(runq: queue.Queue) -> Callable:
         global run_checker
         global run_runner
         if str(query) == "Engage":
-            print("runq put")
+            debug("runq put")
             runq.put(True)
         elif str(query) == "Discard":
             close_checker()
@@ -56,11 +56,11 @@ def borgmatic_checker(icon: pystray.Icon, port: int = defaults.DEFAULT_PORT):
 
     def _borgmatic_checker():
         listener = Listener((defaults.LISTEN_HOST, port))
-        print("accepting connections")
+        notice("accepting connections")
         while True:
             conn = listener.accept()
             msg = conn.recv()
-            print(f"msg: {msg}")
+            debug(f"msg: {msg}")
             if msg == defaults.MSG_JOB_STARTED:
                 icon.icon = get_image(running=True)
                 conn.close()
@@ -68,11 +68,11 @@ def borgmatic_checker(icon: pystray.Icon, port: int = defaults.DEFAULT_PORT):
                 icon.icon = get_image()
                 conn.close()
             if msg == defaults.MSG_CLOSE:
-                print("closing")
+                debug("closing")
                 conn.close()
                 break
         listener.close()
-        print("stop listening")
+        notice("stop listening")
     return _borgmatic_checker
 
 
@@ -83,20 +83,20 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
             if runq.get():
                 icon.icon = get_image(running=True)
                 icon.notify("Commencing backup...")
-                print("Running borgmatic...")
+                notice("Running borgmatic...")
                 time.sleep(5)
-                print("Done.")
+                notice("Done.")
                 icon.icon = get_image()
                 icon.notify("Finished backup")
             else:
-                print("runq is false")
+                debug("runq is false")
                 break
     return _borgmatic_runner
 
 
 def app():
     runq = queue.Queue()
-    icon = pystray.Icon(p_name, get_image(), title, menu=create_menu(runq))
+    icon = pystray.Icon(defaults.APP_NAME, get_image(), title, menu=create_menu(runq))
     checker = threading.Thread(target=borgmatic_checker(icon))
     checker.start()
     runner = threading.Thread(target=borgmatic_runner(icon, runq))
