@@ -18,7 +18,7 @@ def close_checker(c: Config):
     send_msg(defaults.MSG_CLOSE, c)
 
 
-def cli():
+def createArgumentParser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog=defaults.CLIENT_NAME, description="Tray icon for borgmatic (client)"
     )
@@ -32,7 +32,11 @@ def cli():
         help=f"generate minimal configuration file at default location",
     )
     parser.add_argument("message", nargs="?", choices=defaults.ALLOWED_CLIENT_MESSAGES)
-    args = parser.parse_args()
+    return parser
+
+
+def cli():
+    args = createArgumentParser().parse_args()
 
     if args.ini:
         try:
