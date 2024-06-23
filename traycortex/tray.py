@@ -67,9 +67,11 @@ def borgmatic_checker(icon: pystray.Icon, port: int = defaults.DEFAULT_PORT):
             debug(f"msg: {msg}")
             if msg == defaults.MSG_JOB_STARTED:
                 icon.icon = get_image(running=True)
+                icon.notify("Backup started")
                 conn.close()
             if msg == defaults.MSG_JOB_FINISHED:
                 icon.icon = get_image()
+                icon.notify("Finished backup")
                 conn.close()
             if msg == defaults.MSG_CLOSE:
                 debug("closing")
@@ -115,7 +117,6 @@ def app():
             c = Config.findConfig()
     except ConfigError:
         sys.exit(1)
-    print(c)
     runq = queue.Queue()
     icon = pystray.Icon(defaults.APP_NAME, get_image(), title, menu=create_menu(runq))
     checker = threading.Thread(target=borgmatic_checker(icon))
