@@ -21,7 +21,7 @@ darkmode = True
 res = resources.files(traycortex.images)
 # standard image and image while running
 image = Image.open(res / "borgmatic.png")
-image_r = Image.open(res / "borgmatic.png")
+image_r = Image.open(res / "borgmatic_r.png")
 # same for darkmode (inverted)
 image_i = Image.open(res / "borgmatic_i.png")
 image_i_r = Image.open(res / "borgmatic_i_r.png")
