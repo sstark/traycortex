@@ -9,12 +9,16 @@ import traycortex.log
 
 
 def send_msg(msg: str, c: Config, port: int = defaults.DEFAULT_PORT):
+    """Send a message to the tray component"""
     conn = Client((defaults.LISTEN_HOST, port), authkey=c.authkey)
     conn.send(msg)
     conn.close()
 
 
 def close_checker(c: Config):
+    """Send a close message to the tray component
+       This is just a shortcut for properly ending the app
+    """
     send_msg(defaults.MSG_CLOSE, c)
 
 

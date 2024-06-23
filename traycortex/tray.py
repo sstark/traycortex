@@ -28,6 +28,7 @@ image_i_r = Image.open(res / "borgmatic_i_r.png")
 
 
 def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
+    """Return a suitable image for the tray icon"""
     if running:
         return image_i_r if darkmode else image_r
     else:
@@ -35,6 +36,7 @@ def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
 
 
 def create_menu(runq: queue.Queue, c: Config) -> pystray.Menu:
+    """Populate the tray icon menu"""
     return pystray.Menu(
         pystray.MenuItem("Engage", menu_click(runq, c)),
         pystray.MenuItem("Discard", menu_click(runq, c)),
@@ -42,6 +44,7 @@ def create_menu(runq: queue.Queue, c: Config) -> pystray.Menu:
 
 
 def menu_click(runq: queue.Queue, c: Config) -> Callable:
+    """Return a function that will andle tray icon menu events"""
 
     def _menu_click(icon: pystray.Icon, query: pystray.MenuItem):
         global run_checker
@@ -58,6 +61,11 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
 
 
 def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAULT_PORT):
+    """Return a function that will report the status of borgmatic
+
+    This will listen on a socket for incoming messages and notify the user
+    or change the tray icon according to the current status of borgmatic.
+    """
 
     def _borgmatic_checker():
         listener = Listener((defaults.LISTEN_HOST, port), authkey=c.authkey)
@@ -89,13 +97,14 @@ def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAUL
 
 
 def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
+    """Return a function that will run borgmatic when receiving a True value in runq"""
 
     def _borgmatic_runner():
         while True:
             if runq.get():
                 icon.icon = get_image(running=True)
                 icon.notify("Commencing backup...")
-                notice("Running borgmatic...")
+                notice("Running borgmatic... (not implemented yet)")
                 time.sleep(5)
                 notice("Done.")
                 icon.icon = get_image()
@@ -108,6 +117,7 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
 
 
 def app() -> int:
+    """A tray app showing the status of borgmatic and offering a few actions"""
     parser = argparse.ArgumentParser(
         prog=defaults.APP_NAME, description="Tray icon for borgmatic"
     )
