@@ -3,11 +3,11 @@ name = "traycortex"
 version = "0.1.0"
 description = "borgmatic systray icon"
 authors = ["Sebastian Stark <sstark@mailbox.org>"]
-license = "ISC"
+license = "GPLv3"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.9"
 pystray = "^0.19.5"
 pillow = "^10.3.0"
 pygobject = "^3.48.2"
