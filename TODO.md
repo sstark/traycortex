@@ -21,3 +21,4 @@
 
 - Tests
   - Add tests
+  - How to deal with missing pystray type stubs?
