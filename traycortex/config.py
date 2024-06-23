@@ -2,7 +2,10 @@ from platformdirs import user_config_path
 from pathlib import Path
 from configparser import ConfigParser
 from traycortex import defaults
-from traycortex.log import debug
+from traycortex.log import debug, err
+
+class ConfigError(Exception):
+    pass
 
 class Config:
 
@@ -12,8 +15,12 @@ class Config:
 
     def sourceConfigFile(self, f: Path):
         ini = ConfigParser()
-        with open(f) as cf:
-            ini.read_file(cf)
+        try:
+            with open(f) as cf:
+                ini.read_file(cf)
+        except OSError as e:
+            err(f"Could not open configuration file {f}: {e}")
+            raise ConfigError
         self.config = ini
 
     def check_config(self):
