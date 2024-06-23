@@ -1,5 +1,6 @@
 from traycortex import defaults
 from multiprocessing.connection import Client
+from multiprocessing.context import AuthenticationError
 import argparse
 import sys
 from traycortex.config import Config
@@ -7,14 +8,14 @@ from traycortex.config import ConfigError
 from traycortex.log import err, debug
 
 
-def send_msg(msg: str, port: int = defaults.DEFAULT_PORT):
-    conn = Client((defaults.LISTEN_HOST, port))
+def send_msg(msg: str, c: Config, port: int = defaults.DEFAULT_PORT):
+    conn = Client((defaults.LISTEN_HOST, port), authkey=c.authkey)
     conn.send(msg)
     conn.close()
 
 
-def close_checker():
-    send_msg(defaults.MSG_CLOSE)
+def close_checker(c: Config):
+    send_msg(defaults.MSG_CLOSE, c)
 
 
 def cli():
@@ -49,12 +50,15 @@ def cli():
     except ConfigError:
         sys.exit(1)
     debug(c)
+
     if args.message not in defaults.ALLOWED_CLIENT_MESSAGES:
         err("no message or invalid message given")
         sys.exit(2)
     try:
-        send_msg(args.message)
+        send_msg(args.message, c)
     except ConnectionRefusedError as e:
         err(f"Connection error: {e}. Did you start {defaults.APP_NAME}?")
+    except AuthenticationError as e:
+        err(f"Authentication error: {e}")
     except ConnectionError as e:
         err(f"Connection error: {e}.")

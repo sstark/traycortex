@@ -2,7 +2,7 @@ import inspect
 from pathlib import Path
 from textwrap import dedent
 
-DEBUG = False
+DEBUG = True
 QUIET = False
 VERBOSE = False
 

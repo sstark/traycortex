@@ -7,9 +7,10 @@ import queue
 from importlib import resources
 import traycortex.images
 from multiprocessing.connection import Listener
+from multiprocessing.context import AuthenticationError
 from traycortex.client import close_checker
 from traycortex import defaults
-from traycortex.log import debug, notice
+from traycortex.log import debug, notice, err
 from traycortex.config import ConfigError, Config
 import argparse
 import sys
@@ -33,14 +34,14 @@ def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
         return image_i if darkmode else image
 
 
-def create_menu(runq: queue.Queue) -> pystray.Menu:
+def create_menu(runq: queue.Queue, c: Config) -> pystray.Menu:
     return pystray.Menu(
-        pystray.MenuItem("Engage", menu_click(runq)),
-        pystray.MenuItem("Discard", menu_click(runq)),
+        pystray.MenuItem("Engage", menu_click(runq, c)),
+        pystray.MenuItem("Discard", menu_click(runq, c)),
     )
 
 
-def menu_click(runq: queue.Queue) -> Callable:
+def menu_click(runq: queue.Queue, c: Config) -> Callable:
 
     def _menu_click(icon: pystray.Icon, query: pystray.MenuItem):
         global run_checker
@@ -49,20 +50,24 @@ def menu_click(runq: queue.Queue) -> Callable:
             debug("runq put")
             runq.put(True)
         elif str(query) == "Discard":
-            close_checker()
+            close_checker(c)
             runq.put(False)
             icon.stop()
 
     return _menu_click
 
 
-def borgmatic_checker(icon: pystray.Icon, port: int = defaults.DEFAULT_PORT):
+def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAULT_PORT):
 
     def _borgmatic_checker():
-        listener = Listener((defaults.LISTEN_HOST, port))
+        listener = Listener((defaults.LISTEN_HOST, port), authkey=c.authkey)
         notice("accepting connections")
         while True:
-            conn = listener.accept()
+            try:
+                conn = listener.accept()
+            except AuthenticationError as e:
+                err(f"Authentication error: {e}")
+                continue
             msg = conn.recv()
             debug(f"msg: {msg}")
             if msg == defaults.MSG_JOB_STARTED:
@@ -118,8 +123,10 @@ def app():
     except ConfigError:
         sys.exit(1)
     runq = queue.Queue()
-    icon = pystray.Icon(defaults.APP_NAME, get_image(), title, menu=create_menu(runq))
-    checker = threading.Thread(target=borgmatic_checker(icon))
+    icon = pystray.Icon(
+        defaults.APP_NAME, get_image(), title, menu=create_menu(runq, c)
+    )
+    checker = threading.Thread(target=borgmatic_checker(icon, c))
     checker.start()
     runner = threading.Thread(target=borgmatic_runner(icon, runq))
     runner.start()

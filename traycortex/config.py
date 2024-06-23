@@ -28,8 +28,12 @@ class Config:
     def check_config(self):
         pass
 
+    @property
+    def authkey(self) -> bytes:
+        return self.config["connection"]["authkey"].encode("UTF-8")
+
     @staticmethod
-    def create_auth() -> str:
+    def create_authkey() -> str:
         return secrets.token_hex(16)
 
     @staticmethod
@@ -39,7 +43,7 @@ class Config:
             raise ConfigError(f"{configfile} already exists")
         ini = ConfigParser()
         ini.add_section("connection")
-        ini.set("connection", "auth", Config.create_auth())
+        ini.set("connection", "authkey", Config.create_authkey())
         try:
             with open(configfile, "w+") as cf:
                 ini.write(cf)
