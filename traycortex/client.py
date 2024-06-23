@@ -20,6 +20,6 @@ def cli():
     parser.add_argument(
         "-c", "--config", help=f"{defaults.CLIENT_NAME} configuration file"
     )
-    parser.add_argument("message")
+    parser.add_argument("message", choices=defaults.ALLOWED_CLIENT_MESSAGES)
     args = parser.parse_args()
     send_msg(args.message)
