@@ -6,10 +6,15 @@ import time
 import queue
 from importlib import resources
 import traycortex.images
+from multiprocessing.connection import Listener
+from multiprocessing.connection import Client
 
+DEFAULT_PORT = 35234
+MSG_JOB_STARTED = "job started"
+MSG_JOB_FINISHED = "job finished"
+MSG_CLOSE = "close"
 p_name = __package__ or __name__
 title = "Borgmatic"
-run_checker = True
 run_runner = True
 darkmode = True
 
@@ -45,16 +50,41 @@ def menu_click(runq: queue.Queue) -> Callable:
             print("runq put")
             runq.put(True)
         elif str(query) == "Discard":
-            run_checker = False
             run_runner = False
+            close_checker()
             runq.put(False)
             icon.stop()
     return _menu_click
 
 
-def borgmatic_checker():
-    while run_checker:
-        time.sleep(0.5)
+def close_checker(port: int = DEFAULT_PORT):
+    conn = Client(("localhost", port))
+    conn.send(MSG_CLOSE)
+    conn.close()
+
+
+def borgmatic_checker(icon: pystray.Icon, port: int = DEFAULT_PORT):
+
+    def _borgmatic_checker():
+        listener = Listener(("localhost", port))
+        print("accepting connections")
+        while True:
+            conn = listener.accept()
+            msg = conn.recv()
+            print(f"msg: {msg}")
+            if msg == MSG_JOB_STARTED:
+                icon.icon = get_image(running=True)
+                conn.close()
+            if msg == MSG_JOB_FINISHED:
+                icon.icon = get_image()
+                conn.close()
+            if msg == MSG_CLOSE:
+                print("closing")
+                conn.close()
+                break
+        listener.close()
+        print("stop listening")
+    return _borgmatic_checker
 
 
 def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
@@ -75,7 +105,7 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
 def app():
     runq = queue.Queue()
     icon = pystray.Icon(p_name, get_image(), title, menu=create_menu(runq))
-    checker = threading.Thread(target=borgmatic_checker)
+    checker = threading.Thread(target=borgmatic_checker(icon))
     checker.start()
     runner = threading.Thread(target=borgmatic_runner(icon, runq))
     runner.start()
