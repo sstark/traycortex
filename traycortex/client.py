@@ -58,7 +58,11 @@ def cli():
         send_msg(args.message, c)
     except ConnectionRefusedError as e:
         err(f"Connection error: {e}. Did you start {defaults.APP_NAME}?")
+        sys.exit(3)
     except AuthenticationError as e:
         err(f"Authentication error: {e}")
+        sys.exit(3)
     except ConnectionError as e:
         err(f"Connection error: {e}.")
+        sys.exit(3)
+    sys.exit(0)
