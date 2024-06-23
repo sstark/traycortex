@@ -4,6 +4,7 @@ import argparse
 import sys
 from traycortex.config import Config
 from traycortex.config import ConfigError
+from traycortex.log import err, debug
 
 
 def send_msg(msg: str, port: int = defaults.DEFAULT_PORT):
@@ -23,8 +24,23 @@ def cli():
     parser.add_argument(
         "-c", "--config", help=f"{defaults.CLIENT_NAME} configuration file"
     )
-    parser.add_argument("message", choices=defaults.ALLOWED_CLIENT_MESSAGES)
+    parser.add_argument(
+        "-i",
+        "--ini",
+        action="store_true",
+        help=f"generate minimal configuration file at default location",
+    )
+    parser.add_argument("message", nargs="?", choices=defaults.ALLOWED_CLIENT_MESSAGES)
     args = parser.parse_args()
+
+    if args.ini:
+        try:
+            Config.create_initial_config()
+            sys.exit(0)
+        except ConfigError as e:
+            err(f"Error creating initial config: {e}")
+            sys.exit(1)
+
     try:
         if args.config:
             c = Config(args.config)
@@ -32,5 +48,8 @@ def cli():
             c = Config.findConfig()
     except ConfigError:
         sys.exit(1)
-    print(c)
+    debug(c)
+    if args.message not in defaults.ALLOWED_CLIENT_MESSAGES:
+        err("no message or invalid message given")
+        sys.exit(2)
     send_msg(args.message)

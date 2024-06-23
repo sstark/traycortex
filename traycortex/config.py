@@ -3,9 +3,11 @@ from pathlib import Path
 from configparser import ConfigParser
 from traycortex import defaults
 from traycortex.log import debug, err
+import secrets
 
 class ConfigError(Exception):
     pass
+
 
 class Config:
 
@@ -26,8 +28,23 @@ class Config:
     def check_config(self):
         pass
 
-    def create_initial_config(self):
-        pass
+    @staticmethod
+    def create_auth() -> str:
+        return secrets.token_hex(16)
+
+    @staticmethod
+    def create_initial_config():
+        configfile = user_config_path(defaults.CONFIG_NAME)
+        if configfile.exists():
+            raise ConfigError(f"{configfile} already exists")
+        ini = ConfigParser()
+        ini.add_section("connection")
+        ini.set("connection", "auth", Config.create_auth())
+        try:
+            with open(configfile, "w+") as cf:
+                ini.write(cf)
+        except OSError as e:
+            raise ConfigError(f"{configfile} could not be written: {e}")
 
     @classmethod
     def findConfig(cls) -> "Config":
