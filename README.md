@@ -20,7 +20,14 @@ icon changes accordingly.
 
 ## Installation
 
-Recommended:
+### Prerequites
+
+Some packages are required to build and install traycortex (probably incomplete):
+
+  - Ubuntu: `apt install libcairo2-dev python-gi-dev libgirepository1.0-dev`
+  - Arch: `yay gobject-introspection python-cairo`
+
+Recommended way to install:
 
     pipx install traycortex
 
