@@ -7,12 +7,9 @@ import queue
 from importlib import resources
 import traycortex.images
 from multiprocessing.connection import Listener
-from multiprocessing.connection import Client
+from traycortex.client import close_checker
+from traycortex import defaults
 
-DEFAULT_PORT = 35234
-MSG_JOB_STARTED = "job started"
-MSG_JOB_FINISHED = "job finished"
-MSG_CLOSE = "close"
 p_name = __package__ or __name__
 title = "Borgmatic"
 darkmode = True
@@ -55,28 +52,22 @@ def menu_click(runq: queue.Queue) -> Callable:
     return _menu_click
 
 
-def close_checker(port: int = DEFAULT_PORT):
-    conn = Client(("localhost", port))
-    conn.send(MSG_CLOSE)
-    conn.close()
-
-
-def borgmatic_checker(icon: pystray.Icon, port: int = DEFAULT_PORT):
+def borgmatic_checker(icon: pystray.Icon, port: int = defaults.DEFAULT_PORT):
 
     def _borgmatic_checker():
-        listener = Listener(("localhost", port))
+        listener = Listener((defaults.LISTEN_HOST, port))
         print("accepting connections")
         while True:
             conn = listener.accept()
             msg = conn.recv()
             print(f"msg: {msg}")
-            if msg == MSG_JOB_STARTED:
+            if msg == defaults.MSG_JOB_STARTED:
                 icon.icon = get_image(running=True)
                 conn.close()
-            if msg == MSG_JOB_FINISHED:
+            if msg == defaults.MSG_JOB_FINISHED:
                 icon.icon = get_image()
                 conn.close()
-            if msg == MSG_CLOSE:
+            if msg == defaults.MSG_CLOSE:
                 print("closing")
                 conn.close()
                 break
