@@ -13,7 +13,6 @@ from traycortex import defaults
 from traycortex.log import debug, notice, err
 from traycortex.config import ConfigError, Config
 import argparse
-import sys
 
 title = "Borgmatic"
 darkmode = True
@@ -107,7 +106,7 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
     return _borgmatic_runner
 
 
-def app():
+def app() -> int:
     parser = argparse.ArgumentParser(
         prog=defaults.APP_NAME, description="Tray icon for borgmatic"
     )
@@ -121,7 +120,7 @@ def app():
         else:
             c = Config.findConfig()
     except ConfigError:
-        sys.exit(1)
+        return 1
     runq = queue.Queue()
     icon = pystray.Icon(
         defaults.APP_NAME, get_image(), title, menu=create_menu(runq, c)
@@ -131,3 +130,4 @@ def app():
     runner = threading.Thread(target=borgmatic_runner(icon, runq))
     runner.start()
     icon.run()
+    return 0

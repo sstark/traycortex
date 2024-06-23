@@ -2,7 +2,6 @@ from traycortex import defaults
 from multiprocessing.connection import Client
 from multiprocessing.context import AuthenticationError
 import argparse
-import sys
 from traycortex.config import Config
 from traycortex.config import ConfigError
 from traycortex.log import err, debug
@@ -35,16 +34,16 @@ def createArgumentParser() -> argparse.ArgumentParser:
     return parser
 
 
-def cli():
+def cli() -> int:
     args = createArgumentParser().parse_args()
 
     if args.ini:
         try:
             Config.create_initial_config()
-            sys.exit(0)
+            return 0
         except ConfigError as e:
             err(f"Error creating initial config: {e}")
-            sys.exit(1)
+            return 1
 
     try:
         if args.config:
@@ -52,21 +51,21 @@ def cli():
         else:
             c = Config.findConfig()
     except ConfigError:
-        sys.exit(1)
+        return 1
     debug(c)
 
     if args.message not in defaults.ALLOWED_CLIENT_MESSAGES:
         err("no message or invalid message given")
-        sys.exit(2)
+        return 2
     try:
         send_msg(args.message, c)
     except ConnectionRefusedError as e:
         err(f"Connection error: {e}. Did you start {defaults.APP_NAME}?")
-        sys.exit(3)
+        return 3
     except AuthenticationError as e:
         err(f"Authentication error: {e}")
-        sys.exit(3)
+        return 3
     except ConnectionError as e:
         err(f"Connection error: {e}.")
-        sys.exit(3)
-    sys.exit(0)
+        return 3
+    return 0
