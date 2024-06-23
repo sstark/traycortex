@@ -12,10 +12,23 @@ Along with it comes a traycortex-cli application, that is used in the borgmatic
 hooks configuration to signal the tray icon. Currently the only states that are
 implemented are "job_started" and "job_finished".
 
+![screenshot of tray running](doc/tray-running.png)
+
+When the status of a backup is updated, a notification will be displayed and the
+icon changes accordingly.
+
 
 ## Installation
 
+Recommended:
+
     pipx install traycortex
+
+Also works:
+
+    pip install traycortex
+
+*Packagers welcome*
 
 
 ## Configuration File
