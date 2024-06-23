@@ -52,4 +52,9 @@ def cli():
     if args.message not in defaults.ALLOWED_CLIENT_MESSAGES:
         err("no message or invalid message given")
         sys.exit(2)
-    send_msg(args.message)
+    try:
+        send_msg(args.message)
+    except ConnectionRefusedError as e:
+        err(f"Connection error: {e}. Did you start {defaults.APP_NAME}?")
+    except ConnectionError as e:
+        err(f"Connection error: {e}.")
