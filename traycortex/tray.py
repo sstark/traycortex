@@ -15,7 +15,6 @@ MSG_JOB_FINISHED = "job finished"
 MSG_CLOSE = "close"
 p_name = __package__ or __name__
 title = "Borgmatic"
-run_runner = True
 darkmode = True
 
 res = resources.files(traycortex.images)
@@ -50,7 +49,6 @@ def menu_click(runq: queue.Queue) -> Callable:
             print("runq put")
             runq.put(True)
         elif str(query) == "Discard":
-            run_runner = False
             close_checker()
             runq.put(False)
             icon.stop()
@@ -90,7 +88,7 @@ def borgmatic_checker(icon: pystray.Icon, port: int = DEFAULT_PORT):
 def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
 
     def _borgmatic_runner():
-        while run_runner:
+        while True:
             if runq.get():
                 icon.icon = get_image(running=True)
                 icon.notify("Commencing backup...")
@@ -99,6 +97,9 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
                 print("Done.")
                 icon.icon = get_image()
                 icon.notify("Finished backup")
+            else:
+                print("runq is false")
+                break
     return _borgmatic_runner
 
 
