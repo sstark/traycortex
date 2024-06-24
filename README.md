@@ -25,7 +25,7 @@ icon changes accordingly.
 Some packages are required to build and install traycortex (probably incomplete):
 
   - Ubuntu: `apt install libcairo2-dev python-gi-dev libgirepository1.0-dev`
-  - Arch: `yay gobject-introspection python-cairo`
+  - Arch: `pacman -S gobject-introspection python-cairo libappindicator-gtk3`
 
 Recommended way to install:
 
