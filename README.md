@@ -57,6 +57,20 @@ To create a working minimal configuration (if you do not have one already) use:
 This will generate a random authkey and place it in a new configuration file.
 If a configuration file already exists, above command will fail.
 
+### Other Configuration File Options
+
+The command used to create a backup (when selecting the "Engage" menu item):
+
+    [borgmatic]
+    ; default: borgmatic
+    command = systemd-inhibit --why="Backup is running" /usr/local/bin/borgmatic
+
+
+## Tray Menu
+
+  - **Engage**: Run a borgmatic backup
+  - **Discard**: Quit traycortex and remove the icon from the tray
+
 
 ## Integrating with borgmatic
 
