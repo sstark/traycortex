@@ -9,3 +9,6 @@ CONFIG_NAME = APP_NAME + ".ini"
 ALLOWED_CLIENT_MESSAGES = [MSG_JOB_STARTED, MSG_JOB_FINISHED]
 # args allowed
 BORGMATIC_COMMAND = "borgmatic"
+MENU_ENGAGE = "Engage"
+MENU_ENGAGE_RUNNING = "Engage: Running..."
+MENU_DISCARD = "Discard"

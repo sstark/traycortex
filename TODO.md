@@ -5,13 +5,10 @@
   - Try and document what happens with "sudo borgmatic"
 
 - Menu
-  - Disable while backup is running
-  - Implement "Engage"
   - Engage should be a sub menu when multiple borgmatic
     yaml files exist and individual files should be addressable.
 
 - Config file
-  - adjust borgmatic command path
   - adjust listen port
   - dark/light theme config option
 

@@ -2,7 +2,6 @@ from collections.abc import Callable
 import pystray
 from PIL import Image
 import threading
-import time
 import queue
 from importlib import resources
 import traycortex.images
@@ -26,7 +25,7 @@ image_r = Image.open(res / "borgmatic_r.png")
 # same for darkmode (inverted)
 image_i = Image.open(res / "borgmatic_i.png")
 image_i_r = Image.open(res / "borgmatic_i_r.png")
-
+backup_running = False
 
 def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
     """Return a suitable image for the tray icon"""
@@ -36,11 +35,20 @@ def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
         return image_i if darkmode else image
 
 
+def engage_text(_):
+    global backup_running
+    return defaults.MENU_ENGAGE_RUNNING if backup_running else defaults.MENU_ENGAGE
+
+def engage_enabled(_):
+    global backup_running
+    return not backup_running
+
+
 def create_menu(c: Config, runq: queue.Queue) -> pystray.Menu:
     """Populate the tray icon menu"""
     return pystray.Menu(
-        pystray.MenuItem("Engage", menu_click(runq, c)),
-        pystray.MenuItem("Discard", menu_click(runq, c)),
+        pystray.MenuItem(engage_text, menu_click(runq, c), enabled=engage_enabled),
+        pystray.MenuItem(defaults.MENU_DISCARD, menu_click(runq, c)),
     )
 
 
@@ -48,12 +56,11 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
     """Return a function that will andle tray icon menu events"""
 
     def _menu_click(icon: pystray.Icon, query: pystray.MenuItem):
-        global run_checker
-        global run_runner
-        if str(query) == "Engage":
+        global engage_text
+        if str(query) == defaults.MENU_ENGAGE:
             debug("runq put")
             runq.put(True)
-        elif str(query) == "Discard":
+        elif str(query) == defaults.MENU_DISCARD:
             close_checker(c)
             runq.put(False)
             icon.stop()
@@ -69,6 +76,7 @@ def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAUL
     """
 
     def _borgmatic_checker():
+        global backup_running
         listener = Listener((defaults.LISTEN_HOST, port), authkey=c.authkey)
         notice("accepting connections")
         while True:
@@ -80,10 +88,12 @@ def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAUL
             msg = conn.recv()
             debug(f"msg: {msg}")
             if msg == defaults.MSG_JOB_STARTED:
+                backup_running = True
                 icon.icon = get_image(running=True)
                 icon.notify("Backup started")
                 conn.close()
             if msg == defaults.MSG_JOB_FINISHED:
+                backup_running = False
                 icon.icon = get_image()
                 icon.notify("Finished backup")
                 conn.close()
@@ -91,6 +101,7 @@ def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAUL
                 debug("closing")
                 conn.close()
                 break
+            icon.update_menu()
         listener.close()
         notice("stop listening")
 
@@ -101,15 +112,21 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
     """Return a function that will run borgmatic when receiving a True value in runq"""
 
     def _borgmatic_runner():
+        global backup_running
         while True:
             if runq.get():
-                icon.icon = get_image(running=True)
+                debug("set backup_running to True")
+                backup_running = True
+                icon.icon = get_image(running=backup_running)
+                icon.update_menu()
                 icon.notify("Commencing backup...")
                 notice("Running borgmatic...")
                 run_borgmatic(c)
                 notice("Done.")
                 icon.icon = get_image()
                 icon.notify("Finished backup")
+                backup_running = False
+                icon.update_menu()
             else:
                 debug("runq is false")
                 break
