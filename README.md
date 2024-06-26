@@ -69,7 +69,8 @@ The command used to create a backup (when selecting the "Engage" menu item):
 ## Tray Menu
 
   - **Engage**: Run a borgmatic backup
-  - **Discard**: Quit traycortex and remove the icon from the tray
+  - **Discard**: Quit traycortex and remove the icon from the tray. If a backup
+    is currently running, it will be killed.
 
 
 ## Integrating with borgmatic
