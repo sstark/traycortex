@@ -14,6 +14,7 @@ import traycortex.log
 from traycortex.log import debug, notice, err
 from traycortex.config import ConfigError, Config
 import argparse
+from traycortex.borgmatic import run_borgmatic
 
 title = "Borgmatic"
 darkmode = True
@@ -35,7 +36,7 @@ def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
         return image_i if darkmode else image
 
 
-def create_menu(runq: queue.Queue, c: Config) -> pystray.Menu:
+def create_menu(c: Config, runq: queue.Queue) -> pystray.Menu:
     """Populate the tray icon menu"""
     return pystray.Menu(
         pystray.MenuItem("Engage", menu_click(runq, c)),
@@ -96,7 +97,7 @@ def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAUL
     return _borgmatic_checker
 
 
-def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
+def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callable:
     """Return a function that will run borgmatic when receiving a True value in runq"""
 
     def _borgmatic_runner():
@@ -104,8 +105,8 @@ def borgmatic_runner(icon: pystray.Icon, runq: queue.Queue) -> Callable:
             if runq.get():
                 icon.icon = get_image(running=True)
                 icon.notify("Commencing backup...")
-                notice("Running borgmatic... (not implemented yet)")
-                time.sleep(5)
+                notice("Running borgmatic...")
+                run_borgmatic(c)
                 notice("Done.")
                 icon.icon = get_image()
                 icon.notify("Finished backup")
@@ -138,11 +139,11 @@ def app() -> int:
         return 1
     runq = queue.Queue()
     icon = pystray.Icon(
-        defaults.APP_NAME, get_image(), title, menu=create_menu(runq, c)
+        defaults.APP_NAME, get_image(), title, menu=create_menu(c, runq)
     )
     checker = threading.Thread(target=borgmatic_checker(icon, c))
     checker.start()
-    runner = threading.Thread(target=borgmatic_runner(icon, runq))
+    runner = threading.Thread(target=borgmatic_runner(icon, c, runq))
     runner.start()
     icon.run()
     return 0

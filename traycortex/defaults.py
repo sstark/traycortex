@@ -7,3 +7,5 @@ CLIENT_NAME = "traycortex-cli"
 APP_NAME = "traycortex"
 CONFIG_NAME = APP_NAME + ".ini"
 ALLOWED_CLIENT_MESSAGES = [MSG_JOB_STARTED, MSG_JOB_FINISHED]
+# args allowed
+BORGMATIC_COMMAND = "borgmatic"
