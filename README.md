@@ -1,14 +1,18 @@
 
 # Traycortex
 
-Tray icon for borgmatic.
-
-**(Early work in Progress.)**
-
 traycortex is an application that will show the status of [borgmatic
 backup](https://torsion.org/borgmatic/) in your system tray.
 
-Along with it comes a traycortex-cli application, that is used in the borgmatic
+Features:
+
+  - System **tray menu** for running borgmatic
+  - Client application to **integrate with borgmatic** for detecting timed backup runs
+  - **Notifications** (backup started, backup finished)
+  - Configuration file to allow customizing the borgmatic command
+  - **ssh-agent detection** to enable easy use of password protected ssh keys
+
+Along with it comes a *traycortex-cli* application, that is used in the borgmatic
 hooks configuration to signal the tray icon. Currently the only states that are
 implemented are "job_started" and "job_finished".
 
@@ -109,7 +113,7 @@ non-interactive use. And probably you also want to have a passphrase set
 for the private ssh key.
 
 traycortex will try to detect a running ssh-agent and set the environment for
-borgmatic to have the SSH_AUTH_SOCK environment variable set. This makes it
+borgmatic to have the `SSH_AUTH_SOCK` environment variable set. This makes it
 independent from its starting environment with regard to that variable.
 
 You will still have to add your key to the running ssh-agent.
