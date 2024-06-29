@@ -14,6 +14,7 @@ def find_ssh_agent_socket() -> Optional[Path]:
     """
     # According to ssh-agent(1) this is where the socket should be located
     tmpdir = Path(os.environ.get("TMPDIR", "/tmp"))
+    debug(f"tmpdir: {tmpdir}")
     # A bit more guesswork and sanity check that we have a socket. Return
     # the first agent found, because we have no clue which one is correct
     # anyway.

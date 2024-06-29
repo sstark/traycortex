@@ -38,7 +38,7 @@ Also works:
 *Packagers welcome*
 
 
-## Configuration File
+### Configuration File
 
 Location: `$XDG_CONFIG_HOME/traycortex.ini`
 
@@ -62,7 +62,10 @@ If a configuration file already exists, above command will fail.
 The command used to create a backup (when selecting the "Engage" menu item):
 
     [borgmatic]
-    ; default: borgmatic
+    ; default:
+    ;   command = borgmatic
+    ; For testing non-interactive ssh you can set this:
+    ;   command = ssh -oBatchMode=yes <backupserver> date
     command = systemd-inhibit --why="Backup is running" /usr/local/bin/borgmatic
 
 
@@ -96,3 +99,28 @@ To start the tray application:
     traycortex &
 
 Other methods of starting will be investigated (.desktop file, systemd user unit)
+
+
+## ssh-agent detection
+
+With borgmatic it is likely you use ssh to access a remote backup repository.
+You probably have public key authentication set up for this to allow
+non-interactive use. And probably you also want to have a passphrase set
+for the private ssh key.
+
+traycortex will try to detect a running ssh-agent and set the environment for
+borgmatic to have the SSH_AUTH_SOCK environment variable set. This makes it
+independent from its starting environment with regard to that variable.
+
+You will still have to add your key to the running ssh-agent.
+
+It is recommended to use
+
+    ssh_command: ssh -oBatchMode=yes
+
+in your borgmatic configuration. This way, if ssh-agent detection fails, or you
+have not added the necessary key to it, borgmatic will properly fail and not
+wait for input in the background.
+
+If you have multiple ssh-agents running, traycortex currently has no way to
+know which one is correct and will simply use the first one found.
