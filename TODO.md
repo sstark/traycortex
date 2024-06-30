@@ -1,6 +1,6 @@
 
 - App
-  - desktop file
+  - desktop file (create automatically)
   - systemd user unit
   - Try and document what happens with "sudo borgmatic"
 
@@ -9,8 +9,8 @@
     yaml files exist and individual files should be addressable.
 
 - Config file
-  - adjust listen port
   - dark/light theme config option
+  - make ssh-agent detection optional
 
 - Events
   - parametrize message (job name)
@@ -18,10 +18,3 @@
 
 - Alarm
   - Notify when there was no backup for a given time (How!?)
-
-- Documentation
-  - Screenshots
-
-- Tests
-  - Add tests
-  - How to deal with missing pystray type stubs?
