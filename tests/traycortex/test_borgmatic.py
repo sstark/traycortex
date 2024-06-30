@@ -36,7 +36,5 @@ def test_find_ssh_agent_socket(monkeypatch, tmpdir):
 
 
 def test_find_ssh_agent_socket_notfound(monkeypatch, tmpdir):
-    sockname = tmpdir / "ssh-XXXasdf" / "agent.007"
-    sockname.parent.mkdir()
     monkeypatch.setenv("TMPDIR", str(tmpdir))
     assert find_ssh_agent_socket() == None
