@@ -42,6 +42,10 @@ class Config:
         """Key for socket authentication"""
         return self.config["connection"]["authkey"].encode("UTF-8")
 
+    @property
+    def port(self) -> int:
+        return self.config.getint("connection", "port", fallback=defaults.DEFAULT_PORT)
+
     @staticmethod
     def create_authkey() -> str:
         """Create a random key used for socket authentication"""

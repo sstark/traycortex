@@ -6,10 +6,12 @@ import time
 
 
 def test_borgmatic_checker(populated_config_object, mock_icon):
+    # Make test not fail if another instance is already running
+    populated_config_object.config["connection"]["port"] = "35235"
     inner_func = borgmatic_checker(mock_icon, populated_config_object)
     checker = threading.Thread(target=inner_func)
     checker.start()
-    # We need to wat for the thread to have initialized
+    # We need to wait for the thread to have initialized
     time.sleep(1)
     send_msg(MSG_JOB_STARTED, populated_config_object)
     send_msg(MSG_JOB_FINISHED, populated_config_object)

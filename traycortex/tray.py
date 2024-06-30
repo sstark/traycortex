@@ -79,9 +79,7 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
     return _menu_click
 
 
-def borgmatic_checker(
-    icon: pystray.Icon, c: Config, port: int = defaults.DEFAULT_PORT
-) -> Callable:
+def borgmatic_checker(icon: pystray.Icon, c: Config) -> Callable:
     """Return a function that will report the status of borgmatic
 
     This will listen on a socket for incoming messages and notify the user
@@ -90,7 +88,7 @@ def borgmatic_checker(
 
     def _borgmatic_checker():
         global backup_running
-        listener = Listener((defaults.LISTEN_HOST, port), authkey=c.authkey)
+        listener = Listener((defaults.LISTEN_HOST, c.port), authkey=c.authkey)
         notice("accepting connections")
         while True:
             try:

@@ -8,9 +8,9 @@ from traycortex.log import err, debug
 import traycortex.log
 
 
-def send_msg(msg: str, c: Config, port: int = defaults.DEFAULT_PORT):
+def send_msg(msg: str, c: Config):
     """Send a message to the tray component"""
-    conn = Client((defaults.LISTEN_HOST, port), authkey=c.authkey)
+    conn = Client((defaults.LISTEN_HOST, c.port), authkey=c.authkey)
     conn.send(msg)
     conn.close()
 

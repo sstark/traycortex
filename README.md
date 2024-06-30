@@ -47,14 +47,6 @@ Also works:
 
 Location: `$XDG_CONFIG_HOME/traycortex.ini`
 
-Currently the only configuration that is possible is the authkey that is used
-to authenticate the connection between *traycortex* and *traycortex-cli*
-
-Example:
-
-    [connection]
-    authkey = ce03f7af891ebc29defc0643faf71025
-
 To create a working minimal configuration (if you do not have one already) use:
 
     traycortex-cli --ini
@@ -62,7 +54,17 @@ To create a working minimal configuration (if you do not have one already) use:
 This will generate a random authkey and place it in a new configuration file.
 If a configuration file already exists, above command will fail.
 
-### Other Configuration File Options
+### Configuration File Options
+
+The authentication key and port for the connection between traycortex and
+traycortex-cli:
+
+    [connection]
+    ; no default value. Randomly set on "traycortex-cli --ini".
+    authkey = ce03f7af891ebc29defc0643faf71025
+    ; default:
+    ;   port = 35234
+    port = 54321
 
 The command used to create a backup (when selecting the "Engage" menu item):
 
