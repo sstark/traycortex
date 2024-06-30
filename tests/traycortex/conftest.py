@@ -62,5 +62,13 @@ class MockIcon():
 
 
 @pytest.fixture
+def tmpdir():
+    p = Path(tempfile.TemporaryDirectory(suffix="-TMP").name)
+    p.mkdir()
+    yield p
+    rmtree(p)
+
+
+@pytest.fixture
 def mock_icon():
     return MockIcon()
