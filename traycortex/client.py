@@ -36,7 +36,7 @@ def createArgumentParser() -> argparse.ArgumentParser:
         "-i",
         "--ini",
         action="store_true",
-        help=f"generate minimal configuration file at default location",
+        help="generate minimal configuration file at default location",
     )
     parser.add_argument("message", nargs="?", choices=defaults.ALLOWED_CLIENT_MESSAGES)
     return parser

@@ -32,11 +32,11 @@ def get_image(
     running: bool = False, darkmode: bool = darkmode, error: bool = False
 ) -> Image.Image:
     """Return a suitable image for the tray icon"""
-    if error: 
+    if error:
         # Add colored background to image. For the error image
         # we always use the "non running" version.
         img = image_i if darkmode else image
-        img_b = Image.new('RGB', (img.width, img.height), "red")
+        img_b = Image.new("RGB", (img.width, img.height), "red")
         img_b.paste(img, (0, 0), img.convert("RGBA"))
         return img_b
     if running:

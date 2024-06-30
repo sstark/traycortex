@@ -1,4 +1,3 @@
-
 from subprocess import run, CalledProcessError
 from traycortex.config import Config
 from traycortex.log import err, debug
@@ -6,6 +5,7 @@ from traycortex.defaults import BORGMATIC_COMMAND
 from pathlib import Path
 from typing import Optional
 import os
+
 
 def find_ssh_agent_socket() -> Optional[Path]:
     """Search for an ssh-agent socket in the expected directory
@@ -39,7 +39,9 @@ def run_borgmatic(c: Config) -> int:
     """Run borgmatic"""
     cmd = c.config.get("borgmatic", "command", fallback=BORGMATIC_COMMAND)
     try:
-        result = run(cmd, shell=True, text=True, capture_output=True, env=borgmatic_environment())
+        result = run(
+            cmd, shell=True, text=True, capture_output=True, env=borgmatic_environment()
+        )
         result.check_returncode()
         if result.stderr:
             err(f"{result.returncode}\n{result.stderr}")

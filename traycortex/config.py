@@ -6,6 +6,7 @@ from traycortex import defaults
 from traycortex.log import debug, err
 import secrets
 
+
 class ConfigError(Exception):
     pass
 
