@@ -1,4 +1,7 @@
+from collections.abc import Iterable
+from itertools import chain
 from subprocess import run, CalledProcessError
+from traycortex import defaults
 from traycortex.config import Config
 from traycortex.log import err, debug
 from traycortex.defaults import BORGMATIC_COMMAND
@@ -56,3 +59,11 @@ def run_borgmatic(c: Config) -> int:
         err(f"borgmatic error: {e}")
         return e.returncode
     return result.returncode
+
+
+def find_all_borgmatic_yaml() -> Iterable[Path]:
+    for path in defaults.BORGMATIC_YAML_PATHS:
+        if path.is_dir():
+            yield from chain(path.glob("*.yml"), path.glob("*.yaml"))
+        else:
+            yield path
