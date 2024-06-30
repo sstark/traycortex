@@ -1,4 +1,6 @@
 from traycortex.config import Config
+from traycortex.config import ConfigError
+import pytest
 
 
 def test_findConfig(monkeypatch, populated_config_file):
@@ -12,4 +14,14 @@ def test_findConfig(monkeypatch, populated_config_file):
     assert c.config["connection"]["authkey"] == "1111111f8911bc39deec0641faf71111"
 
 
-# def test_create_initial_config(fake_home):
+def test_create_initial_config_exists(monkeypatch, populated_config_file):
+
+    def mock_user_config_path(_):
+        return populated_config_file
+
+    monkeypatch.setattr("traycortex.config.user_config_path", mock_user_config_path)
+    _ = Config.findConfig()
+    with pytest.raises(ConfigError) as e:
+        Config.create_initial_config()
+
+    assert str(e.value) == f"{populated_config_file} already exists"
