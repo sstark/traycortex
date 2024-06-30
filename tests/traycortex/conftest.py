@@ -15,10 +15,16 @@ def fake_home():
 
 
 @pytest.fixture
-def populated_config_file(fake_home):
+def config_dir(fake_home):
     confdir = fake_home / "dot.config"
-    confdir.mkdir()
-    config_file = confdir / CONFIG_NAME
+    yield confdir
+    rmtree(confdir)
+
+
+@pytest.fixture
+def populated_config_file(config_dir):
+    config_dir.mkdir()
+    config_file = config_dir / CONFIG_NAME
     min_config = '''
         [connection]
         authkey = 1111111f8911bc39deec0641faf71111
@@ -26,4 +32,4 @@ def populated_config_file(fake_home):
     with open(config_file, "w") as f:
         f.write(dedent(min_config))
     yield config_file
-    rmtree(confdir)
+    config_file.unlink()

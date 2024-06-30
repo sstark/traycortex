@@ -56,6 +56,7 @@ class Config:
         ini.add_section("connection")
         ini.set("connection", "authkey", Config.create_authkey())
         try:
+            configfile.parent.mkdir(parents=True)
             with open(configfile, "w+") as cf:
                 ini.write(cf)
         except OSError as e:
