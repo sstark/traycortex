@@ -176,7 +176,7 @@ def app() -> int:
             c = Config.findConfig()
     except ConfigError:
         return 1
-    runq = queue.Queue()
+    runq: "queue.Queue[bool]" = queue.Queue()
     icon = pystray.Icon(
         defaults.APP_NAME, get_image(), title, menu=create_menu(c, runq)
     )
