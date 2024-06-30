@@ -37,4 +37,4 @@ def test_find_ssh_agent_socket(monkeypatch, tmpdir):
 
 def test_find_ssh_agent_socket_notfound(monkeypatch, tmpdir):
     monkeypatch.setenv("TMPDIR", str(tmpdir))
-    assert find_ssh_agent_socket() == None
+    assert find_ssh_agent_socket() is None
