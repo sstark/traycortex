@@ -58,15 +58,15 @@ def engage_enabled(_) -> bool:
 def create_menu(c: Config, runq: queue.Queue) -> pystray.Menu:
     """Populate the tray icon menu"""
     yaml_items = [
-        pystray.MenuItem(f"Engage {yaml}", menu_click(runq, c))
+        pystray.MenuItem(f"Engage {yaml}", menu_click(runq, c), enabled=engage_enabled)
         for yaml in find_all_borgmatic_yaml()
         if yaml.exists()
     ]
     debug(f"yaml_items: {yaml_items}")
     return pystray.Menu(
         pystray.MenuItem(engage_text, menu_click(runq, c), enabled=engage_enabled),
+        *yaml_items,
         pystray.MenuItem(defaults.MENU_DISCARD, menu_click(runq, c)),
-        *yaml_items
     )
 
 
