@@ -27,6 +27,7 @@ image_i = Image.open(res / "borgmatic_i.png")
 image_i_r = Image.open(res / "borgmatic_i_r.png")
 backup_running = False
 
+
 def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
     """Return a suitable image for the tray icon"""
     if running:
@@ -35,11 +36,12 @@ def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
         return image_i if darkmode else image
 
 
-def engage_text(_):
+def engage_text(_) -> str:
     global backup_running
     return defaults.MENU_ENGAGE_RUNNING if backup_running else defaults.MENU_ENGAGE
 
-def engage_enabled(_):
+
+def engage_enabled(_) -> bool:
     global backup_running
     return not backup_running
 
@@ -68,7 +70,7 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
     return _menu_click
 
 
-def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAULT_PORT):
+def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAULT_PORT) -> Callable:
     """Return a function that will report the status of borgmatic
 
     This will listen on a socket for incoming messages and notify the user
