@@ -2,7 +2,8 @@
 # Traycortex
 
 traycortex is an application that will show the status of [borgmatic
-backup](https://torsion.org/borgmatic/) in your system tray.
+backup](https://torsion.org/borgmatic/) in your system tray. It will also let
+you trigger backups from the menu.
 
 Features:
 
@@ -12,9 +13,9 @@ Features:
   - Configuration file to allow customizing the borgmatic command
   - **ssh-agent detection** to enable easy use of password protected ssh keys
 
-Along with it comes a *traycortex-cli* application, that is used in the borgmatic
-hooks configuration to signal the tray icon. Currently the only states that are
-implemented are "job_started" and "job_finished".
+Along with it comes a *traycortex-cli* application, that is used in the
+borgmatic hooks configuration to signal the tray icon. Possible states are
+"job_started", "job_finished" and "job_error".
 
 ![screenshot of tray running](doc/tray-running.png)
 
@@ -93,6 +94,8 @@ Example `~/.config/borgmatic.d/home.yaml`:
         - traycortex-cli job_started
     after_check:
         - traycortex-cli job_finished
+    on_error:
+        - traycortex-cli job_error
     [...]
 
 

@@ -47,7 +47,10 @@ def run_borgmatic(c: Config) -> int:
             debug("running borgmatic worked. stdout:")
             debug(result.stdout)
             print(result.stdout)
-    except (CalledProcessError, OSError) as e:
+    except OSError as e:
         err(f"borgmatic could not be run: {e}")
         return -1
+    except CalledProcessError as e:
+        err(f"borgmatic error: {e}")
+        return e.returncode
     return result.returncode

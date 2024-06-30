@@ -28,8 +28,17 @@ image_i_r = Image.open(res / "borgmatic_i_r.png")
 backup_running = False
 
 
-def get_image(running: bool = False, darkmode: bool = darkmode) -> Image.Image:
+def get_image(
+    running: bool = False, darkmode: bool = darkmode, error: bool = False
+) -> Image.Image:
     """Return a suitable image for the tray icon"""
+    if error: 
+        # Add colored background to image. For the error image
+        # we always use the "non running" version.
+        img = image_i if darkmode else image
+        img_b = Image.new('RGB', (img.width, img.height), "red")
+        img_b.paste(img, (0, 0), img.convert("RGBA"))
+        return img_b
     if running:
         return image_i_r if darkmode else image_r
     else:
@@ -70,7 +79,9 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
     return _menu_click
 
 
-def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAULT_PORT) -> Callable:
+def borgmatic_checker(
+    icon: pystray.Icon, c: Config, port: int = defaults.DEFAULT_PORT
+) -> Callable:
     """Return a function that will report the status of borgmatic
 
     This will listen on a socket for incoming messages and notify the user
@@ -89,6 +100,11 @@ def borgmatic_checker(icon: pystray.Icon, c: Config, port: int = defaults.DEFAUL
                 continue
             msg = conn.recv()
             debug(f"msg: {msg}")
+            if msg == defaults.MSG_JOB_ERROR:
+                backup_running = False
+                icon.icon = get_image(error=True)
+                icon.notify("Backup error")
+                conn.close()
             if msg == defaults.MSG_JOB_STARTED:
                 backup_running = True
                 icon.icon = get_image(running=True)
@@ -123,10 +139,14 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
                 icon.update_menu()
                 icon.notify("Commencing backup...")
                 notice("Running borgmatic...")
-                run_borgmatic(c)
+                ret = run_borgmatic(c)
                 notice("Done.")
-                icon.icon = get_image()
-                icon.notify("Finished backup")
+                if ret == 0:
+                    icon.icon = get_image()
+                    icon.notify("Finished backup")
+                else:
+                    icon.icon = get_image(error=True)
+                    icon.notify(f"Backup error ({ret})")
                 backup_running = False
                 icon.update_menu()
             else:

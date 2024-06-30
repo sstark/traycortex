@@ -13,7 +13,6 @@
   - dark/light theme config option
 
 - Events
-  - error
   - parametrize message (job name)
   - option to disable notifications
 
