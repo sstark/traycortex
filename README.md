@@ -78,11 +78,20 @@ The command used to create a backup (when selecting the "Engage" menu item):
 
 ## Running
 
-To start the tray application:
+To start the tray application from the command line:
 
     traycortex &
 
-Other methods of starting will be investigated (.desktop file, systemd user unit)
+Or create a desktop file `~/.local/share/applications/traycortex.desktop`:
+
+    [Desktop Entry]
+    Exec=traycortex
+    ; For the icon to work you need to place borgmatic.png in `~/.icons`
+    Icon=borgmatic
+    Name=traycortex
+    Type=Application
+
+Now you can start traycortex with your usual desktop method.
 
 
 ## Tray Menu
