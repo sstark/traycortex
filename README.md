@@ -74,6 +74,15 @@ The command used to create a backup (when selecting the "Engage" menu item):
     command = systemd-inhibit --why="Backup is running" /usr/local/bin/borgmatic
 
 
+## Running
+
+To start the tray application:
+
+    traycortex &
+
+Other methods of starting will be investigated (.desktop file, systemd user unit)
+
+
 ## Tray Menu
 
   - **Engage**: Run a borgmatic backup
@@ -97,15 +106,6 @@ Example `~/.config/borgmatic.d/home.yaml`:
     on_error:
         - traycortex-cli job_error
     [...]
-
-
-## Running
-
-To start the tray application:
-
-    traycortex &
-
-Other methods of starting will be investigated (.desktop file, systemd user unit)
 
 
 ## ssh-agent detection
