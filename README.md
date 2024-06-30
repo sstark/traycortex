@@ -15,7 +15,7 @@ Features:
 
 Along with it comes a *traycortex-cli* application, that is used in the
 borgmatic hooks configuration to signal the tray icon. Possible states are
-"job_started", "job_finished" and "job_error".
+`job_started`, `job_finished` and `job_error`.
 
 ![screenshot of tray running](doc/tray-running.png)
 
