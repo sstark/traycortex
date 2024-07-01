@@ -14,7 +14,7 @@ def test_borgmatic_checker(populated_config_object, mock_icon):
     checker = threading.Thread(target=inner_func)
     checker.start()
     # We need to wait for the thread to have initialized
-    time.sleep(1)
+    time.sleep(0.1)
     send_msg(MSG_JOB_STARTED, populated_config_object)
     send_msg(MSG_JOB_FINISHED, populated_config_object)
     send_msg(MSG_CLOSE, populated_config_object)
@@ -40,7 +40,7 @@ def test_borgmatic_runner_success(
     runner = threading.Thread(target=inner_func)
     runner.start()
     runq.put(True)
-    time.sleep(1)
+    time.sleep(0.1)
     # End the thread
     runq.put(False)
     assert mock_icon.notifications == notifications
