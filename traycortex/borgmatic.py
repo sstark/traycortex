@@ -4,7 +4,6 @@ from subprocess import run, CalledProcessError
 from traycortex import defaults
 from traycortex.config import Config
 from traycortex.log import err, debug
-from traycortex.defaults import BORGMATIC_COMMAND
 from pathlib import Path
 from typing import Optional
 import os
@@ -38,9 +37,9 @@ def borgmatic_environment() -> dict:
     return env
 
 
-def run_borgmatic(c: Config) -> int:
+def run_borgmatic(c: Config, configname: str = "") -> int:
     """Run borgmatic"""
-    cmd = c.config.get("borgmatic", "command", fallback=BORGMATIC_COMMAND)
+    cmd = c.get_command(configname)
     try:
         result = run(
             cmd, shell=True, text=True, capture_output=True, env=borgmatic_environment()

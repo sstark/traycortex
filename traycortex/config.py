@@ -46,6 +46,14 @@ class Config:
     def port(self) -> int:
         return self.config.getint("connection", "port", fallback=defaults.DEFAULT_PORT)
 
+    def get_command(self, configname: str = "") -> str:
+        """Return the command to run borgmatic
+        The result will have @CONFIG@ expanded corresponding to the configname
+        argument. @CONFIG@ will contain either "-c /some/file.yml" or "".
+        """
+        s = self.config.get("borgmatic", "command", fallback=defaults.BORGMATIC_COMMAND)
+        return s.replace(defaults.EXPANDO_CONFIG, f"-c {configname}")
+
     @staticmethod
     def create_authkey() -> str:
         """Create a random key used for socket authentication"""

@@ -23,3 +23,4 @@ BORGMATIC_YAML_PATHS = [
     user_config_path() / "borgmatic/config.yaml",
     user_config_path() / "borgmatic.d",
 ]
+EXPANDO_CONFIG = "@CONFIG@"

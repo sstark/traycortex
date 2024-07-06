@@ -75,6 +75,22 @@ The command used to create a backup (when selecting the "Engage" menu item):
     ;   command = ssh -oBatchMode=yes <backupserver> date
     command = systemd-inhibit --why="Backup is running" /usr/local/bin/borgmatic
 
+You may add the string `@CONFIG@` to the `command` option. For instance you
+could set:
+
+    [borgmatic]
+    command = /bin/borgmatic @CONFIG@ create
+
+`@CONFIG@` will be replaced by `-c <yamlfile>` in case you selected a specific
+yaml file to be run. Otherwise it will be replaced with the empty string. The
+command that will be execeuted in this example will be `/bin/borgmatic create`
+if you just clicked on `Engage`, or `/bin/borgmatic -c /some/config.yml create`
+if you clicked on `Engage /some/config.yml`.
+
+If you engage an individual yaml file without having `@CONFIG@` in your config,
+the resulting action will be equivalent to that of just having clicked
+`Engage`.
+
 
 ## Running
 
