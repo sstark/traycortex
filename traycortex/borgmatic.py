@@ -39,7 +39,9 @@ def borgmatic_environment() -> dict:
 
 def run_borgmatic(c: Config, configname: str = "") -> int:
     """Run borgmatic"""
+    debug(f"configname: {configname}")
     cmd = c.get_command(configname)
+    debug(f"cmd: {cmd}")
     try:
         result = run(
             cmd, shell=True, text=True, capture_output=True, env=borgmatic_environment()

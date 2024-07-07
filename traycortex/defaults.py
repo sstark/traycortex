@@ -13,9 +13,10 @@ CONFIG_NAME = APP_NAME + ".ini"
 ALLOWED_CLIENT_MESSAGES = [MSG_JOB_STARTED, MSG_JOB_FINISHED, MSG_JOB_ERROR]
 # args allowed
 BORGMATIC_COMMAND = "borgmatic"
-MENU_ENGAGE = "Engage"
-MENU_ENGAGE_RUNNING = "Engage: Running..."
 MENU_DISCARD = "Discard"
+MENU_ENGAGE_ALL = "All"
+MENU_PREFIX_ENGAGE = "Engage "
+MENU_SUFFIX_RUNNING = " Running..."
 # According to borgmatic source: borgmatic/config/collect.py
 BORGMATIC_YAML_PATHS = [
     Path("/etc/borgmatic/config.yaml"),

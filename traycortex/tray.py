@@ -8,7 +8,17 @@ import traycortex.images
 from multiprocessing.connection import Listener
 from multiprocessing.context import AuthenticationError
 from traycortex.client import close_checker
-from traycortex import defaults
+from traycortex.defaults import (
+    APP_NAME,
+    LISTEN_HOST,
+    MENU_ENGAGE_ALL,
+    MENU_PREFIX_ENGAGE,
+    MENU_DISCARD,
+    MSG_JOB_ERROR,
+    MSG_JOB_STARTED,
+    MSG_JOB_FINISHED,
+    MSG_CLOSE,
+)
 import traycortex.log
 from traycortex.log import debug, notice, err
 from traycortex.config import ConfigError, Config
@@ -45,11 +55,6 @@ def get_image(
         return image_i if darkmode else image
 
 
-def engage_text(_) -> str:
-    global backup_running
-    return defaults.MENU_ENGAGE_RUNNING if backup_running else defaults.MENU_ENGAGE
-
-
 def engage_enabled(_) -> bool:
     global backup_running
     return not backup_running
@@ -58,15 +63,23 @@ def engage_enabled(_) -> bool:
 def create_menu(c: Config, runq: queue.Queue) -> pystray.Menu:
     """Populate the tray icon menu"""
     yaml_items = [
-        pystray.MenuItem(f"Engage {yaml}", menu_click(runq, c), enabled=engage_enabled)
+        pystray.MenuItem(
+            f"{MENU_PREFIX_ENGAGE}{yaml}",
+            menu_click(runq, c),
+            enabled=engage_enabled,
+        )
         for yaml in find_all_borgmatic_yaml()
         if yaml.exists()
     ]
     debug(f"yaml_items: {yaml_items}")
     return pystray.Menu(
-        pystray.MenuItem(engage_text, menu_click(runq, c), enabled=engage_enabled),
+        pystray.MenuItem(
+            f"{MENU_PREFIX_ENGAGE}{MENU_ENGAGE_ALL}",
+            menu_click(runq, c),
+            enabled=engage_enabled,
+        ),
         *yaml_items,
-        pystray.MenuItem(defaults.MENU_DISCARD, menu_click(runq, c)),
+        pystray.MenuItem(MENU_DISCARD, menu_click(runq, c)),
     )
 
 
@@ -75,12 +88,14 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
 
     def _menu_click(icon: pystray.Icon, query: pystray.MenuItem):
         global engage_text
-        if str(query) == defaults.MENU_ENGAGE:
+        msg = str(query)
+        debug(msg)
+        if msg.startswith(MENU_PREFIX_ENGAGE):
             debug("runq put")
-            runq.put(True)
-        elif str(query) == defaults.MENU_DISCARD:
+            runq.put(msg.removeprefix(MENU_PREFIX_ENGAGE))
+        elif msg == MENU_DISCARD:
             close_checker(c)
-            runq.put(False)
+            runq.put("")
             icon.stop()
 
     return _menu_click
@@ -95,7 +110,7 @@ def borgmatic_checker(icon: pystray.Icon, c: Config) -> Callable:
 
     def _borgmatic_checker():
         global backup_running
-        listener = Listener((defaults.LISTEN_HOST, c.port), authkey=c.authkey)
+        listener = Listener((LISTEN_HOST, c.port), authkey=c.authkey)
         notice("accepting connections")
         while True:
             try:
@@ -105,22 +120,22 @@ def borgmatic_checker(icon: pystray.Icon, c: Config) -> Callable:
                 continue
             msg = conn.recv()
             debug(f"msg: {msg}")
-            if msg == defaults.MSG_JOB_ERROR:
+            if msg == MSG_JOB_ERROR:
                 backup_running = False
                 icon.icon = get_image(error=True)
                 icon.notify("Backup error")
                 conn.close()
-            if msg == defaults.MSG_JOB_STARTED:
+            if msg == MSG_JOB_STARTED:
                 backup_running = True
                 icon.icon = get_image(running=True)
                 icon.notify("Backup started")
                 conn.close()
-            if msg == defaults.MSG_JOB_FINISHED:
+            if msg == MSG_JOB_FINISHED:
                 backup_running = False
                 icon.icon = get_image()
                 icon.notify("Finished backup")
                 conn.close()
-            if msg == defaults.MSG_CLOSE:
+            if msg == MSG_CLOSE:
                 debug("closing")
                 conn.close()
                 break
@@ -137,14 +152,15 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
     def _borgmatic_runner():
         global backup_running
         while True:
-            if runq.get():
+            if msg := runq.get():
+                debug(f"got message {msg}")
                 debug("set backup_running to True")
                 backup_running = True
                 icon.icon = get_image(running=backup_running)
                 icon.update_menu()
                 icon.notify("Commencing backup...")
                 notice("Running borgmatic...")
-                ret = run_borgmatic(c)
+                ret = run_borgmatic(c, "" if msg == MENU_ENGAGE_ALL else msg)
                 notice("Done.")
                 if ret == 0:
                     icon.icon = get_image()
@@ -164,14 +180,12 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
 def app() -> int:
     """A tray app showing the status of borgmatic and offering a few actions"""
     parser = argparse.ArgumentParser(
-        prog=defaults.APP_NAME, description="Tray icon for borgmatic"
+        prog=APP_NAME, description="Tray icon for borgmatic"
     )
     parser.add_argument(
         "-d", "--debug", action="store_true", help="Enable debug output"
     )
-    parser.add_argument(
-        "-c", "--config", help=f"{defaults.APP_NAME} configuration file"
-    )
+    parser.add_argument("-c", "--config", help=f"{APP_NAME} configuration file")
     args = parser.parse_args()
     traycortex.log.DEBUG = args.debug
     try:
@@ -181,10 +195,8 @@ def app() -> int:
             c = Config.findConfig()
     except ConfigError:
         return 1
-    runq: "queue.Queue[bool]" = queue.Queue()
-    icon = pystray.Icon(
-        defaults.APP_NAME, get_image(), title, menu=create_menu(c, runq)
-    )
+    runq: "queue.Queue[str]" = queue.Queue()
+    icon = pystray.Icon(APP_NAME, get_image(), title, menu=create_menu(c, runq))
     checker = threading.Thread(target=borgmatic_checker(icon, c))
     checker.start()
     runner = threading.Thread(target=borgmatic_runner(icon, c, runq))

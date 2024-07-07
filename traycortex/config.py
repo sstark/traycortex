@@ -52,7 +52,9 @@ class Config:
         argument. @CONFIG@ will contain either "-c /some/file.yml" or "".
         """
         s = self.config.get("borgmatic", "command", fallback=defaults.BORGMATIC_COMMAND)
-        return s.replace(defaults.EXPANDO_CONFIG, f"-c {configname}")
+        return s.replace(
+            defaults.EXPANDO_CONFIG, f"-c {configname}" if configname else ""
+        )
 
     @staticmethod
     def create_authkey() -> str:
