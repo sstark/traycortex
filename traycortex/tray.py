@@ -79,6 +79,7 @@ def create_menu(c: Config, runq: queue.Queue) -> pystray.Menu:
             enabled=engage_enabled,
         ),
         *yaml_items,
+        pystray.Menu.SEPARATOR,
         pystray.MenuItem(MENU_DISCARD, menu_click(runq, c)),
     )
 
