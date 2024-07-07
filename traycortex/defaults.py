@@ -24,3 +24,4 @@ BORGMATIC_YAML_PATHS = [
     user_config_path() / "borgmatic.d",
 ]
 EXPANDO_CONFIG = "@CONFIG@"
+TITLE_IDLE = "Borgmatic: idle"

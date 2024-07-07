@@ -18,6 +18,7 @@ from traycortex.defaults import (
     MSG_JOB_STARTED,
     MSG_JOB_FINISHED,
     MSG_CLOSE,
+    TITLE_IDLE,
 )
 import traycortex.log
 from traycortex.log import debug, notice, err
@@ -25,7 +26,6 @@ from traycortex.config import ConfigError, Config
 import argparse
 from traycortex.borgmatic import run_borgmatic, find_all_borgmatic_yaml
 
-title = "Borgmatic"
 darkmode = True
 
 res = resources.files(traycortex.images)
@@ -158,10 +158,12 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
                 debug("set backup_running to True")
                 backup_running = True
                 icon.icon = get_image(running=backup_running)
+                icon.title = f"Running {msg}"
                 icon.update_menu()
                 icon.notify("Commencing backup...")
                 notice("Running borgmatic...")
                 ret = run_borgmatic(c, "" if msg == MENU_ENGAGE_ALL else msg)
+                icon.title = TITLE_IDLE
                 notice("Done.")
                 if ret == 0:
                     icon.icon = get_image()
@@ -197,7 +199,7 @@ def app() -> int:
     except ConfigError:
         return 1
     runq: "queue.Queue[str]" = queue.Queue()
-    icon = pystray.Icon(APP_NAME, get_image(), title, menu=create_menu(c, runq))
+    icon = pystray.Icon(APP_NAME, get_image(), TITLE_IDLE, menu=create_menu(c, runq))
     checker = threading.Thread(target=borgmatic_checker(icon, c))
     checker.start()
     runner = threading.Thread(target=borgmatic_runner(icon, c, runq))
