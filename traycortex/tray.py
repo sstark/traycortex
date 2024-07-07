@@ -18,7 +18,9 @@ from traycortex.defaults import (
     MSG_JOB_STARTED,
     MSG_JOB_FINISHED,
     MSG_CLOSE,
+    TITLE_ERROR,
     TITLE_IDLE,
+    TITLE_PREFIX_RUNNING,
 )
 import traycortex.log
 from traycortex.log import debug, notice, err
@@ -123,16 +125,19 @@ def borgmatic_checker(icon: pystray.Icon, c: Config) -> Callable:
             debug(f"msg: {msg}")
             if msg == MSG_JOB_ERROR:
                 backup_running = False
+                icon.title = TITLE_ERROR
                 icon.icon = get_image(error=True)
                 icon.notify("Backup error")
                 conn.close()
             if msg == MSG_JOB_STARTED:
                 backup_running = True
+                icon.title = f"{TITLE_PREFIX_RUNNING}{msg}"
                 icon.icon = get_image(running=True)
                 icon.notify("Backup started")
                 conn.close()
             if msg == MSG_JOB_FINISHED:
                 backup_running = False
+                icon.title = TITLE_IDLE
                 icon.icon = get_image()
                 icon.notify("Finished backup")
                 conn.close()
@@ -158,7 +163,7 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
                 debug("set backup_running to True")
                 backup_running = True
                 icon.icon = get_image(running=backup_running)
-                icon.title = f"Running {msg}"
+                icon.title = f"{TITLE_PREFIX_RUNNING}{msg}"
                 icon.update_menu()
                 icon.notify("Commencing backup...")
                 notice("Running borgmatic...")
@@ -170,6 +175,7 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
                     icon.notify("Finished backup")
                 else:
                     icon.icon = get_image(error=True)
+                    icon.title = TITLE_ERROR
                     icon.notify(f"Backup error ({ret})")
                 backup_running = False
                 icon.update_menu()

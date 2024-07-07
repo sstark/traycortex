@@ -25,3 +25,5 @@ BORGMATIC_YAML_PATHS = [
 ]
 EXPANDO_CONFIG = "@CONFIG@"
 TITLE_IDLE = "Borgmatic: idle"
+TITLE_PREFIX_RUNNING = "Borgmatic: running "
+TITLE_ERROR = "Borgmatic: error"
