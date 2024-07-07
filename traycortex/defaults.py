@@ -16,7 +16,6 @@ BORGMATIC_COMMAND = "borgmatic"
 MENU_DISCARD = "Discard"
 MENU_ENGAGE_ALL = "All"
 MENU_PREFIX_ENGAGE = "Engage "
-MENU_SUFFIX_RUNNING = " Running..."
 # According to borgmatic source: borgmatic/config/collect.py
 BORGMATIC_YAML_PATHS = [
     Path("/etc/borgmatic/config.yaml"),
