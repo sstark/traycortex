@@ -7,7 +7,7 @@ from importlib import resources
 import traycortex.images
 from multiprocessing.connection import Listener
 from multiprocessing.context import AuthenticationError
-from traycortex.client import close_checker
+from traycortex.client import TCMessage, close_checker
 from traycortex.defaults import (
     APP_NAME,
     LISTEN_HOST,
@@ -121,27 +121,27 @@ def borgmatic_checker(icon: pystray.Icon, c: Config) -> Callable:
             except AuthenticationError as e:
                 err(f"Authentication error: {e}")
                 continue
-            msg = conn.recv()
+            msg: TCMessage = conn.recv()
             debug(f"msg: {msg}")
-            if msg == MSG_JOB_ERROR:
+            if msg.msg == MSG_JOB_ERROR:
                 backup_running = False
                 icon.title = TITLE_ERROR
                 icon.icon = get_image(error=True)
                 icon.notify("Backup error")
                 conn.close()
-            if msg == MSG_JOB_STARTED:
+            if msg.msg == MSG_JOB_STARTED:
                 backup_running = True
-                icon.title = f"{TITLE_PREFIX_RUNNING}{msg}"
+                icon.title = f"{TITLE_PREFIX_RUNNING}{msg.arg}"
                 icon.icon = get_image(running=True)
                 icon.notify("Backup started")
                 conn.close()
-            if msg == MSG_JOB_FINISHED:
+            if msg.msg == MSG_JOB_FINISHED:
                 backup_running = False
                 icon.title = TITLE_IDLE
                 icon.icon = get_image()
                 icon.notify("Finished backup")
                 conn.close()
-            if msg == MSG_CLOSE:
+            if msg.msg == MSG_CLOSE:
                 debug("closing")
                 conn.close()
                 break

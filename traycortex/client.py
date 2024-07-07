@@ -1,4 +1,11 @@
-from traycortex import defaults
+from dataclasses import dataclass
+from traycortex.defaults import (
+    ALLOWED_CLIENT_MESSAGES,
+    APP_NAME,
+    MSG_CLOSE,
+    CLIENT_NAME,
+    LISTEN_HOST,
+)
 from multiprocessing.connection import Client
 from multiprocessing.context import AuthenticationError
 import argparse
@@ -8,37 +15,46 @@ from traycortex.log import err, debug
 import traycortex.log
 
 
-def send_msg(msg: str, c: Config):
+@dataclass
+class TCMessage:
+    msg: str
+    arg: str
+
+    def __post_init__(self):
+        if self.msg not in ALLOWED_CLIENT_MESSAGES + [MSG_CLOSE]:
+            raise ValueError(f"Invalid message: {self.msg}")
+
+
+def send_msg(msg: TCMessage, c: Config):
     """Send a message to the tray component"""
-    conn = Client((defaults.LISTEN_HOST, c.port), authkey=c.authkey)
+    conn = Client((LISTEN_HOST, c.port), authkey=c.authkey)
     conn.send(msg)
     conn.close()
 
 
 def close_checker(c: Config):
     """Send a close message to the tray component
-       This is just a shortcut for properly ending the app
+    This is just a shortcut for properly ending the app
     """
-    send_msg(defaults.MSG_CLOSE, c)
+    msg = TCMessage(MSG_CLOSE, "")
+    send_msg(msg, c)
 
 
 def createArgumentParser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog=defaults.CLIENT_NAME, description="Tray icon for borgmatic (client)"
+        prog=CLIENT_NAME, description="Tray icon for borgmatic (client)"
     )
     parser.add_argument(
         "-d", "--debug", action="store_true", help="Enable debug output"
     )
-    parser.add_argument(
-        "-c", "--config", help=f"{defaults.CLIENT_NAME} configuration file"
-    )
+    parser.add_argument("-c", "--config", help=f"{CLIENT_NAME} configuration file")
     parser.add_argument(
         "-i",
         "--ini",
         action="store_true",
         help="generate minimal configuration file at default location",
     )
-    parser.add_argument("message", nargs="?", choices=defaults.ALLOWED_CLIENT_MESSAGES)
+    parser.add_argument("message", nargs="?", choices=ALLOWED_CLIENT_MESSAGES)
     return parser
 
 
@@ -63,13 +79,13 @@ def cli() -> int:
         return 1
     debug(c)
 
-    if args.message not in defaults.ALLOWED_CLIENT_MESSAGES:
+    if args.message not in ALLOWED_CLIENT_MESSAGES:
         err("no message or invalid message given")
         return 2
     try:
-        send_msg(args.message, c)
+        send_msg(TCMessage(args.message, ""), c)
     except ConnectionRefusedError as e:
-        err(f"Connection error: {e}. Did you start {defaults.APP_NAME}?")
+        err(f"Connection error: {e}. Did you start {APP_NAME}?")
         return 3
     except AuthenticationError as e:
         err(f"Authentication error: {e}")
