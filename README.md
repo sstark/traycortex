@@ -7,7 +7,7 @@ you trigger backups from the menu.
 
 Features:
 
-  - System **tray menu** for running borgmatic
+  - System **tray menu** for running borgmatic (all or single config)
   - Client application to **integrate with borgmatic** for detecting timed backup runs
   - **Notifications** (backup started, backup finished)
   - Configuration file to allow customizing the borgmatic command
@@ -25,7 +25,7 @@ icon changes accordingly.
 
 ## Installation
 
-### Prerequites
+### Prerequisites
 
 Some packages are required to build and install traycortex (probably incomplete):
 
@@ -112,7 +112,9 @@ Now you can start traycortex with your usual desktop method.
 
 ## Tray Menu
 
-  - **Engage**: Run a borgmatic backup
+  - **Engage All**: Run a borgmatic backup
+  - **Engage <configuration>**: Run a borgmatic backup for this specific
+    configuration
   - **Discard**: Quit traycortex and remove the icon from the tray. If a backup
     is currently running, it will be killed.
 
