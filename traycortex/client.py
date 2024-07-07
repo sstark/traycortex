@@ -54,7 +54,18 @@ def createArgumentParser() -> argparse.ArgumentParser:
         action="store_true",
         help="generate minimal configuration file at default location",
     )
-    parser.add_argument("message", nargs="?", choices=ALLOWED_CLIENT_MESSAGES)
+    parser.add_argument(
+        "-m",
+        "--message",
+        help="Message to send",
+        choices=ALLOWED_CLIENT_MESSAGES,
+        required=True,
+    )
+    parser.add_argument(
+        "-a",
+        "--arg",
+        help="Send a message argument (e. g. configname or error message)",
+    )
     return parser
 
 
@@ -83,7 +94,7 @@ def cli() -> int:
         err("no message or invalid message given")
         return 2
     try:
-        send_msg(TCMessage(args.message, ""), c)
+        send_msg(TCMessage(args.message, args.arg if args.arg else ""), c)
     except ConnectionRefusedError as e:
         err(f"Connection error: {e}. Did you start {APP_NAME}?")
         return 3

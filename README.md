@@ -119,6 +119,10 @@ Now you can start traycortex with your usual desktop method.
 
 ## Integrating with borgmatic
 
+If you want to receive notifications for borgmatic jobs that are not directly
+triggered from traycortex, you have to configure the corresponding hooks in
+your borgmatic configuration.
+
 Example `~/.config/borgmatic.d/home.yaml`:
 
     [...]
@@ -127,11 +131,11 @@ Example `~/.config/borgmatic.d/home.yaml`:
     repositories:
         - path: ssh://...
     before_backup:
-        - traycortex-cli job_started
+        - traycortex-cli -m job_started -a "{configuration_filename}"
     after_check:
-        - traycortex-cli job_finished
+        - traycortex-cli -m job_finished -a "{configuration_filename}"
     on_error:
-        - traycortex-cli job_error
+        - traycortex-cli -m job_error -a "{configuration_filename}"
     [...]
 
 
