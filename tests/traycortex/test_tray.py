@@ -1,5 +1,5 @@
 from pathlib import Path
-from traycortex.tray import borgmatic_checker, borgmatic_runner, create_menu
+from traycortex.tray import borgmatic_checker, borgmatic_runner, create_menu, menu_click
 from traycortex.client import TCMessage, send_msg
 from traycortex.defaults import (
     DEFAULT_PORT,
@@ -111,3 +111,10 @@ def test_create_menu(monkeypatch, populated_config_object):
         "- - - -",
         MENU_DISCARD,
     ]
+
+
+def test_menu_click(populated_config_object, mock_icon):
+    runq: "queue.Queue[str]" = queue.Queue()
+    click_handler = menu_click(runq, populated_config_object)
+    click_handler(mock_icon, f"{MENU_PREFIX_ENGAGE}Gookenprien")
+    assert runq.get() == "Gookenprien"
