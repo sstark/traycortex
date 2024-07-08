@@ -52,6 +52,7 @@ class MockIcon():
 
     def __init__(self):
         self.icon = Image.new('RGB', (150, 150), "green")
+        self.title = ""
         self.notifications = []
 
     def notify(self, msg: str):
