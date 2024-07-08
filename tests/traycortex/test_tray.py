@@ -1,4 +1,5 @@
-from traycortex.tray import borgmatic_checker, borgmatic_runner
+from pathlib import Path
+from traycortex.tray import borgmatic_checker, borgmatic_runner, create_menu
 from traycortex.client import TCMessage, send_msg
 from traycortex.defaults import (
     DEFAULT_PORT,
@@ -9,6 +10,9 @@ from traycortex.defaults import (
     TITLE_ERROR,
     TITLE_IDLE,
     TITLE_PREFIX_RUNNING,
+    MENU_PREFIX_ENGAGE,
+    MENU_ENGAGE_ALL,
+    MENU_DISCARD,
 )
 import threading
 import time
@@ -78,3 +82,32 @@ def test_borgmatic_runner_success(
     # End the thread
     runq.put(False)
     assert mock_icon.notifications == notifications
+
+
+def test_create_menu(monkeypatch, populated_config_object):
+
+    def mock_path_exists(_):
+        return True
+
+    def mock_find_all_borgmatic_yaml():
+        return [
+            Path("/etc/borgmatic/config.yaml"),
+            Path("/test/test.yaml"),
+            Path("/test/test2.yml"),
+        ]
+
+    monkeypatch.setattr("traycortex.borgmatic.Path.exists", mock_path_exists)
+    monkeypatch.setattr(
+        "traycortex.tray.find_all_borgmatic_yaml", mock_find_all_borgmatic_yaml
+    )
+    runq: "queue.Queue[str]" = queue.Queue()
+    menu = create_menu(populated_config_object, runq)
+    menu_items = [x.text for x in menu.items]
+    assert menu_items == [
+        f"{MENU_PREFIX_ENGAGE}{MENU_ENGAGE_ALL}",
+        f"{MENU_PREFIX_ENGAGE}/etc/borgmatic/config.yaml",
+        f"{MENU_PREFIX_ENGAGE}/test/test.yaml",
+        f"{MENU_PREFIX_ENGAGE}/test/test2.yml",
+        "- - - -",
+        MENU_DISCARD,
+    ]
