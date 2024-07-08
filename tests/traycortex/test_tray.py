@@ -1,3 +1,4 @@
+from multiprocessing.context import AuthenticationError
 from pathlib import Path
 from traycortex.tray import borgmatic_checker, borgmatic_runner, create_menu, menu_click
 from traycortex.client import TCMessage, send_msg
@@ -18,6 +19,7 @@ import threading
 import time
 import queue
 import pytest
+import copy
 
 
 def test_borgmatic_checker(populated_config_object, mock_icon):
@@ -32,6 +34,22 @@ def test_borgmatic_checker(populated_config_object, mock_icon):
     send_msg(TCMessage(MSG_JOB_FINISHED, ""), populated_config_object)
     send_msg(TCMessage(MSG_CLOSE, ""), populated_config_object)
     assert mock_icon.notifications == ["Backup started", "Finished backup"]
+
+
+def test_borgmatic_checker_wrong_auth(populated_config_object, mock_icon):
+    # Make test not fail if another instance is already running
+    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT))
+    inner_func = borgmatic_checker(mock_icon, populated_config_object)
+    checker = threading.Thread(target=inner_func)
+    checker.start()
+    # We need to wait for the thread to have initialized
+    time.sleep(0.1)
+    wrong_config = copy.deepcopy(populated_config_object)
+    wrong_config.config["connection"]["authkey"] = "wrong_auth_key"
+    with pytest.raises(AuthenticationError):
+        send_msg(TCMessage(MSG_JOB_STARTED, ""), wrong_config)
+    # finally shutdown the server thread with our good copy
+    send_msg(TCMessage(MSG_CLOSE, ""), populated_config_object)
 
 
 def test_borgmatic_checker_with_args(populated_config_object, mock_icon):
