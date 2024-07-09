@@ -24,7 +24,7 @@ import copy
 
 def test_borgmatic_checker(populated_config_object, mock_icon):
     # Make test not fail if another instance is already running
-    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT))
+    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT+1))
     inner_func = borgmatic_checker(mock_icon, populated_config_object)
     checker = threading.Thread(target=inner_func)
     checker.start()
@@ -38,7 +38,7 @@ def test_borgmatic_checker(populated_config_object, mock_icon):
 
 def test_borgmatic_checker_wrong_auth(populated_config_object, mock_icon):
     # Make test not fail if another instance is already running
-    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT))
+    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT+1))
     inner_func = borgmatic_checker(mock_icon, populated_config_object)
     checker = threading.Thread(target=inner_func)
     checker.start()
@@ -54,7 +54,7 @@ def test_borgmatic_checker_wrong_auth(populated_config_object, mock_icon):
 
 def test_borgmatic_checker_with_args(populated_config_object, mock_icon):
     # Make test not fail if another instance is already running
-    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT))
+    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT+1))
     inner_func = borgmatic_checker(mock_icon, populated_config_object)
     checker = threading.Thread(target=inner_func)
     checker.start()
@@ -88,7 +88,7 @@ def test_borgmatic_checker_with_args(populated_config_object, mock_icon):
 def test_borgmatic_runner_success(
     populated_config_object, mock_icon, borgmatic_command, notifications
 ):
-    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT))
+    populated_config_object.config.set("connection", "port", value=str(DEFAULT_PORT+1))
     populated_config_object.config.add_section("borgmatic")
     populated_config_object.config.set("borgmatic", "command", value=borgmatic_command)
     runq = queue.Queue()
