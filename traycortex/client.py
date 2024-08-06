@@ -74,7 +74,8 @@ def cli() -> int:
             c = Config.findConfig()
     except ConfigError:
         print(
-            "No configuration file found. Please create one or run traycortex once to generate a default one."
+            "No configuration file found. "
+            "Please create one or run traycortex once to generate a default one."
         )
         return 1
     debug(c)
