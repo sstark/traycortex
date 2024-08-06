@@ -201,7 +201,7 @@ def app() -> int:
         if args.config:
             c = Config(args.config)
         else:
-            c = Config.findConfig()
+            c = Config.findConfig(create=True)
     except ConfigError:
         return 1
     runq: "queue.Queue[str]" = queue.Queue()

@@ -49,12 +49,6 @@ def createArgumentParser() -> argparse.ArgumentParser:
     )
     parser.add_argument("-c", "--config", help=f"{CLIENT_NAME} configuration file")
     parser.add_argument(
-        "-i",
-        "--ini",
-        action="store_true",
-        help="generate minimal configuration file at default location",
-    )
-    parser.add_argument(
         "-m",
         "--message",
         help="Message to send",
@@ -73,20 +67,15 @@ def cli() -> int:
     args = createArgumentParser().parse_args()
     traycortex.log.DEBUG = args.debug
 
-    if args.ini:
-        try:
-            Config.create_initial_config()
-            return 0
-        except ConfigError as e:
-            err(f"Error creating initial config: {e}")
-            return 1
-
     try:
         if args.config:
             c = Config(args.config)
         else:
             c = Config.findConfig()
     except ConfigError:
+        print(
+            "No configuration file found. Please create one or run traycortex once to generate a default one."
+        )
         return 1
     debug(c)
 

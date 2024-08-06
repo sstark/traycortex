@@ -47,12 +47,10 @@ Also works:
 
 Location: `$XDG_CONFIG_HOME/traycortex.ini`
 
-To create a working minimal configuration (if you do not have one already) use:
+If not found, an initial basic configuration file with a random authkey will be
+created on first run of traycortex.
 
-    traycortex-cli --ini
-
-This will generate a random authkey and place it in a new configuration file.
-If a configuration file already exists, above command will fail.
+The same configuration file is used for both, traycortex and traycortex-cli.
 
 ### Configuration File Options
 

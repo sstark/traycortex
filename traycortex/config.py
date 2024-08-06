@@ -71,17 +71,20 @@ class Config:
         ini.add_section("connection")
         ini.set("connection", "authkey", Config.create_authkey())
         try:
-            configfile.parent.mkdir(parents=True)
+            configfile.parent.mkdir(parents=True, exist_ok=True)
             with open(configfile, "w+") as cf:
                 ini.write(cf)
         except OSError as e:
             raise ConfigError(f"{configfile} could not be written: {e}")
 
     @classmethod
-    def findConfig(cls) -> "Config":
+    def findConfig(cls, create: bool = False) -> "Config":
         """Search a valid config file and return a Config object"""
         configfile = user_config_path(defaults.CONFIG_NAME)
         debug(configfile)
+        if not configfile.exists() and create:
+            print(f"Creating initial configuration in {configfile}")
+            cls.create_initial_config()
         return cls(configfile)
 
     def __str__(self) -> str:
