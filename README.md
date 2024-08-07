@@ -58,7 +58,7 @@ The authentication key and port for the connection between traycortex and
 traycortex-cli:
 
     [connection]
-    ; no default value. Randomly set on "traycortex-cli --ini".
+    ; no default value. Randomly set on first run.
     authkey = ce03f7af891ebc29defc0643faf71025
     ; default:
     ;   port = 35234
