@@ -11,7 +11,7 @@ from multiprocessing.context import AuthenticationError
 import argparse
 from traycortex.config import Config
 from traycortex.config import ConfigError
-from traycortex.log import err, debug
+from traycortex.log import err, debug, notice
 import traycortex.log
 
 
@@ -73,7 +73,7 @@ def cli() -> int:
         else:
             c = Config.findConfig()
     except ConfigError:
-        print(
+        notice(
             "No configuration file found. "
             "Please create one or run traycortex once to generate a default one."
         )
