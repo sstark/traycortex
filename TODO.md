@@ -3,6 +3,10 @@
   - desktop file (create automatically)
   - systemd user unit
   - Try and document what happens with "sudo borgmatic"
+  - Checkbox: "Shutdown after current backup has finished"
+      * normally disabled
+      * enabled when backup is running
+      * disabled again after backup
 
 - Config file
   - dark/light theme config option
