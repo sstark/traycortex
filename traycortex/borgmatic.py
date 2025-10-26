@@ -17,10 +17,14 @@ def find_ssh_agent_socket() -> Optional[Path]:
     # According to ssh-agent(1) this is where the socket should be located
     tmpdir = Path(os.environ.get("TMPDIR", "/tmp"))
     debug(f"tmpdir: {tmpdir}")
+    sshagentdir = Path(os.path.expanduser('~')) / ".ssh" / "agent"
+    debug(f"sshagentdir: {sshagentdir}")
     # A bit more guesswork and sanity check that we have a socket. Return
     # the first agent found, because we have no clue which one is correct
     # anyway.
-    return next((x for x in tmpdir.glob("ssh-*/agent.*") if x.is_socket()), None)
+    return next(filter(lambda x: x.is_socket(),
+                       chain(sshagentdir.glob('*'), tmpdir.glob("ssh-*/agent.*"))
+                       ), None)
 
 
 def borgmatic_environment() -> dict:

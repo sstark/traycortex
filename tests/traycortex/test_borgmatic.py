@@ -28,13 +28,31 @@ def test_run_borgmatic_nonexisting_cmd(populated_config_object):
 
 def test_find_ssh_agent_socket(monkeypatch, tmpdir):
     sockname = tmpdir / "ssh-XXXasdf" / "agent.007"
-    sockname.parent.mkdir()
-    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-    server.bind(str(sockname))
+    make_socket_server(sockname)
     monkeypatch.setenv("TMPDIR", str(tmpdir))
+    monkeypatch.setattr("os.path.expanduser", lambda x: "/dev/null")
     assert find_ssh_agent_socket() == sockname
+
+
+def test_find_ssh_agent_socket2(monkeypatch, tmpdir):
+    monkeypatch.setattr("os.path.expanduser", lambda x: tmpdir / "home" / "user")
+    monkeypatch.setenv("TMPDIR", str(tmpdir))
+    sock1 = tmpdir / "home" / "user" / ".ssh" / "agent" / "sock"
+    make_socket_server(sock1)
+    sock2 = tmpdir / "ssh-XXXasdf" / "agent.007"
+    make_socket_server(sock2)
+    assert find_ssh_agent_socket() == sock1
+    assert find_ssh_agent_socket() != sock2
+
+
+def make_socket_server(p):
+    p.parent.mkdir(parents=True)
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.bind(str(p))
+    return server
 
 
 def test_find_ssh_agent_socket_notfound(monkeypatch, tmpdir):
     monkeypatch.setenv("TMPDIR", str(tmpdir))
+    monkeypatch.setattr("os.path.expanduser", lambda x: "/dev/null")
     assert find_ssh_agent_socket() is None
