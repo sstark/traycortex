@@ -30,13 +30,14 @@ from traycortex.borgmatic import run_borgmatic, find_all_borgmatic_yaml
 
 darkmode = True
 
-res = resources.files(traycortex.images)
-# standard image and image while running
-image = Image.open(res / "borgmatic.png")
-image_r = Image.open(res / "borgmatic_r.png")
-# same for darkmode (inverted)
-image_i = Image.open(res / "borgmatic_i.png")
-image_i_r = Image.open(res / "borgmatic_i_r.png")
+with resources.path(traycortex.images) as images:
+    # standard image and image while running
+    image = Image.open(images / "borgmatic.png")
+    image_r = Image.open(images / "borgmatic_r.png")
+    # same for darkmode (inverted)
+    image_i = Image.open(images / "borgmatic_i.png")
+    image_i_r = Image.open(images / "borgmatic_i_r.png")
+
 backup_running = False
 
 
@@ -58,7 +59,7 @@ def get_image(
 
 
 def engage_enabled(_) -> bool:
-    global backup_running
+    global backup_running  # noqa: F824
     return not backup_running
 
 
@@ -90,7 +91,7 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
     """Return a function that will andle tray icon menu events"""
 
     def _menu_click(icon: pystray.Icon, query: pystray.MenuItem):
-        global engage_text
+        global engage_text  # noqa: F824
         msg = str(query)
         debug(msg)
         if msg.startswith(MENU_PREFIX_ENGAGE):
