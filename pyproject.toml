@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "traycortex"
-version = "0.5.1"
+version = "0.5.2"
 description = "borgmatic systray icon"
 authors = ["Sebastian Stark <sstark@mailbox.org>"]
 license = "GPL-3.0-only"
