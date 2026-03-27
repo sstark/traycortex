@@ -1,29 +1,44 @@
-[tool.poetry]
+[project]
 name = "traycortex"
 version = "0.5.2"
 description = "borgmatic systray icon"
-authors = ["Sebastian Stark <sstark@mailbox.org>"]
-license = "GPL-3.0-only"
+authors = [{ name = "Sebastian Stark", email = "sstark@mailbox.org" }]
+requires-python = ">=3.10,<4"
 readme = "README.md"
+license = "GPL-3.0-only"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+dependencies = [
+    "pystray>=0.19.5,<0.20",
+    "pillow>=12.1.1",
+    "pygobject>=3.48.2,<4",
+    "platformdirs>=4.2.2,<5",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-pystray = "^0.19.5"
-pillow = "^10.4.0"
-pygobject = "^3.48.2"
-platformdirs = "^4.2.2"
-
-
-[tool.poetry.group.dev.dependencies]
-mypy = "^1.18.1"
-pytest = "^8.2.2"
-coverage = "^7.5.4"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-
-[tool.poetry.scripts]
+[project.scripts]
 traycortex = "traycortex.tray:app"
 traycortex-cli = "traycortex.client:cli"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.18.1,<2",
+    "pytest>=8.2.2,<9",
+    "coverage>=7.5.4,<8",
+]
+
+[tool.uv]
+default-groups = "all"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[build-system]
+requires = ["uv_build>=0.9.9,<0.10.0"]
+build-backend = "uv_build"

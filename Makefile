@@ -9,16 +9,16 @@ all: test typecheck lint
 
 test:
 ifdef VERBOSE
-	poetry run pytest -vvv
+	uv run pytest -vvv
 else
-	@poetry run pytest
+	@uv run pytest
 endif
 
 typecheck:
 ifdef VERBOSE
-	poetry run mypy
+	uv run mypy
 else
-	@poetry run mypy
+	@uv run mypy
 endif
 
 lint:
@@ -32,24 +32,21 @@ debug:
 	python -m debugpy --wait-for-client --listen 127.0.0.1:$(DEBUG_PORT) \
 		$(PROGRAM_FULLPATH) $(OPTS)
 
-shell:
-	poetry shell
-
 push-all: test typecheck lint
 	@git remote | xargs -L1 git push --all
 
 build: test typecheck lint
-	poetry build -f wheel
+	uv build -f wheel
 
 coverage:
 	coverage run -m pytest
 	coverage report -m
 
 release: build
-	poetry publish
+	uv publish
 
 release-test: build
-	poetry publish -r test-pypi
+	uv publish -r test-pypi
 
 clean:
 	rm -rf dist
