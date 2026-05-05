@@ -1,4 +1,4 @@
-{ lib, pkgs, ... }:
+{ lib, pkgs,... }:
 let
     traycortex = pkgs.python3Packages.buildPythonApplication {
         pname = "traycortex";
@@ -25,8 +25,8 @@ let
         src = pkgs.fetchFromGitHub {
             owner = "sstark";
             repo = "traycortex";
-            rev = "f43c820f976d37a9f16682b673e6dce00c3199b1";
-            hash = "sha256-QjhKhhvrt/6hB7zpm1CMLPQcwWZ8g79Z7MFyBUpD/Qg=";
+            rev = "c2c2b78956be97d3513198766f28bc40bee31a67";
+            hash = "sha256-duvFWGqS3VLDORMoZgpqOFFtht72Dt/WH3nKOPBv/+U=";
         };
 
         meta = {
