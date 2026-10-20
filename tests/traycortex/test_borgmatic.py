@@ -7,8 +7,8 @@ import socket
 @pytest.mark.parametrize(
     "borgmatic_command, return_value",
     [
-        ("/bin/true", 0),
-        ("/bin/false", 1),
+        ("true", 0),
+        ("false", 1),
         ("exit 9", 9),
     ],
 )

@@ -80,8 +80,8 @@ def test_borgmatic_checker_with_args(populated_config_object, mock_icon):
 @pytest.mark.parametrize(
     "borgmatic_command, notifications",
     [
-        ("/bin/true", ["Commencing backup...", "Finished backup"]),
-        ("/bin/false", ["Commencing backup...", "Backup error (1)"]),
+        ("true", ["Commencing backup...", "Finished backup"]),
+        ("false", ["Commencing backup...", "Backup error (1)"]),
         ("exit 9", ["Commencing backup...", "Backup error (9)"]),
     ],
 )
