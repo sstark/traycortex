@@ -23,7 +23,7 @@
 
       mkTraycortex = pkgs: pkgs.python3Packages.buildPythonApplication {
         pname = "traycortex";
-        version = "0.5.2";
+        version = "0.5.3";
         pyproject = true;
 
         inherit src;
@@ -75,6 +75,29 @@
           program = lib.getExe self.packages.${system}.default;
         };
       });
+
+      devShells = forAllSystems (system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          default = pkgs.mkShell {
+            packages = with pkgs; [
+              uv
+              pkg-config
+              glib
+              meson
+              ninja
+              python3Packages.flake8
+
+              # typelibs needed by pystray/gi; the gobject-introspection
+              # setup hook puts these into GI_TYPELIB_PATH
+              gobject-introspection
+              gtk3
+              libayatana-appindicator
+            ];
+          };
+        });
 
       homeModules.default = { config, lib, pkgs, ... }:
         let
