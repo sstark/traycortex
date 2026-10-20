@@ -42,6 +42,37 @@ Also works:
 
 *Packagers welcome*
 
+### Nix / home-manager
+
+Add
+
+    inputs.traycortex.url = "github:sstark/traycortex";
+
+as an input in your `flake.nix` and import the home-manager module, e. g.:
+
+```nix
+homeConfigurations."you@host" = home-manager.lib.homeManagerConfiguration {
+  pkgs = nixpkgs.legacyPackages.x86_64-linux;
+  modules = [
+    traycortex.homeModules.default
+    ./home.nix
+  ];
+};
+```
+
+Then enable it:
+
+    services.traycortex.enable = true;
+
+This installs traycortex and starts it as a systemd user service. Set
+`services.traycortex.useSystemd = false` if you prefer to start it yourself
+(e.g. via your desktop autostart), or override `services.traycortex.package`
+to use a different package.
+
+You can also run it directly without home-manager:
+
+    nix run github:sstark/traycortex
+
 
 ### Configuration File
 
