@@ -1,11 +1,12 @@
 [project]
 name = "traycortex"
-version = "0.5.2"
+version = "0.5.3"
 description = "borgmatic systray icon"
 authors = [{ name = "Sebastian Stark", email = "sstark@mailbox.org" }]
 requires-python = ">=3.10,<4"
 readme = "README.md"
 license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
