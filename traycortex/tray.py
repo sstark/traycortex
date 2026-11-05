@@ -14,10 +14,12 @@ from traycortex.defaults import (
     MENU_ENGAGE_ALL,
     MENU_PREFIX_ENGAGE,
     MENU_DISCARD,
+    MENU_VIEW_ERROR,
     MSG_JOB_ERROR,
     MSG_JOB_STARTED,
     MSG_JOB_FINISHED,
     MSG_CLOSE,
+    NO_ERROR_RECORDED,
     TITLE_ERROR,
     TITLE_IDLE,
     TITLE_PREFIX_RUNNING,
@@ -26,9 +28,15 @@ import traycortex.log
 from traycortex.log import debug, notice, err
 from traycortex.config import ConfigError, Config
 import argparse
-from traycortex.borgmatic import run_borgmatic, find_all_borgmatic_yaml
+from traycortex.borgmatic import run_borgmatic, find_all_borgmatic_yaml, interpret_error, get_last_error
+from typing import Optional
+import gi
+gi.require_version("Gtk", "3.0")
+from gi.repository import Gtk  # noqa: E402
 
 darkmode = True
+
+last_error: Optional[str] = None
 
 with resources.path(traycortex.images) as images:
     # standard image and image while running
@@ -58,6 +66,41 @@ def get_image(
         return image_i if darkmode else image
 
 
+def show_error_dialog(message: str) -> None:
+    """Show a resizable window with the full, uninterpreted error message
+
+    Unlike a system notification, this is not limited in size, so the
+    whole message is readable.
+    """
+    dialog = Gtk.MessageDialog(
+        transient_for=None,
+        flags=0,
+        message_type=Gtk.MessageType.ERROR,
+        buttons=Gtk.ButtonsType.CLOSE,
+        text="Backup error",
+    )
+    dialog.set_resizable(True)
+    dialog.set_default_size(500, 300)
+
+    text_view = Gtk.TextView()
+    text_view.set_editable(False)
+    text_view.set_cursor_visible(False)
+    text_view.set_wrap_mode(Gtk.WrapMode.WORD_CHAR)
+    text_view.set_monospace(True)
+    text_view.set_left_margin(6)
+    text_view.set_right_margin(6)
+    text_view.get_buffer().set_text(message)
+
+    scrolled = Gtk.ScrolledWindow()
+    scrolled.set_hexpand(True)
+    scrolled.set_vexpand(True)
+    scrolled.add(text_view)
+
+    dialog.get_content_area().pack_start(scrolled, True, True, 0)
+    dialog.connect("response", lambda d, _response: d.destroy())
+    dialog.show_all()
+
+
 def engage_enabled(_) -> bool:
     global backup_running  # noqa: F824
     return not backup_running
@@ -83,6 +126,8 @@ def create_menu(c: Config, runq: queue.Queue) -> pystray.Menu:
         ),
         *yaml_items,
         pystray.Menu.SEPARATOR,
+        pystray.MenuItem(MENU_VIEW_ERROR, menu_click(runq, c)),
+        pystray.Menu.SEPARATOR,
         pystray.MenuItem(MENU_DISCARD, menu_click(runq, c)),
     )
 
@@ -97,6 +142,11 @@ def menu_click(runq: queue.Queue, c: Config) -> Callable:
         if msg.startswith(MENU_PREFIX_ENGAGE):
             debug("runq put")
             runq.put(msg.removeprefix(MENU_PREFIX_ENGAGE))
+        elif msg == MENU_VIEW_ERROR:
+            if last_error:
+                show_error_dialog(last_error)
+            else:
+                icon.notify(NO_ERROR_RECORDED)
         elif msg == MENU_DISCARD:
             close_checker(c)
             runq.put("")
@@ -113,7 +163,7 @@ def borgmatic_checker(icon: pystray.Icon, c: Config) -> Callable:
     """
 
     def _borgmatic_checker():
-        global backup_running
+        global backup_running, last_error
         listener = Listener((LISTEN_HOST, c.port), authkey=c.authkey)
         notice("accepting connections")
         while True:
@@ -126,6 +176,7 @@ def borgmatic_checker(icon: pystray.Icon, c: Config) -> Callable:
             debug(f"msg: {msg}")
             if msg.msg == MSG_JOB_ERROR:
                 backup_running = False
+                last_error = interpret_error(msg.arg) if msg.arg else None
                 icon.title = TITLE_ERROR
                 icon.icon = get_image(error=True)
                 icon.notify(f"Backup error: {msg.arg}")
@@ -157,7 +208,7 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
     """Return a function that will run borgmatic when receiving a True value in runq"""
 
     def _borgmatic_runner():
-        global backup_running
+        global backup_running, last_error
         while True:
             if msg := runq.get():
                 debug(f"got message {msg}")
@@ -172,9 +223,11 @@ def borgmatic_runner(icon: pystray.Icon, c: Config, runq: queue.Queue) -> Callab
                 icon.title = TITLE_IDLE
                 notice("Done.")
                 if ret == 0:
+                    last_error = None
                     icon.icon = get_image()
                     icon.notify("Finished backup")
                 else:
+                    last_error = get_last_error()
                     icon.icon = get_image(error=True)
                     icon.title = TITLE_ERROR
                     icon.notify(f"Backup error ({ret})")

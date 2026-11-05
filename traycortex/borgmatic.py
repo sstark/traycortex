@@ -7,6 +7,60 @@ from traycortex.log import err, debug
 from pathlib import Path
 from typing import Optional
 import os
+import re
+
+# Known cryptic borgmatic/borg/ssh error fragments, mapped to a short
+# human-readable explanation of what likely went wrong and how to fix it.
+# Matched in order, first match wins.
+_ERROR_HINTS: list[tuple[re.Pattern, str]] = [
+    (
+        re.compile(r"Permission denied \(publickey", re.IGNORECASE),
+        "The repository rejected the SSH key. The key required to connect "
+        "is probably not loaded into the running ssh-agent. Try "
+        "`ssh-add <path-to-key>` and run the backup again.",
+    ),
+    (
+        re.compile(r"Could not resolve hostname", re.IGNORECASE),
+        "The backup repository's hostname could not be resolved. Check "
+        "your network connection and the repository address.",
+    ),
+    (
+        re.compile(r"Connection (timed out|refused)", re.IGNORECASE),
+        "The connection to the backup repository was refused or timed "
+        "out. The remote server may be unreachable or down.",
+    ),
+    (
+        re.compile(r"Connection closed by remote host", re.IGNORECASE),
+        "The connection to the backup repository was closed unexpectedly. "
+        "This often happens when SSH authentication failed before borg "
+        "could even start, for example because the required key is not "
+        "loaded into the ssh-agent.",
+    ),
+]
+
+_last_error: Optional[str] = None
+
+
+def interpret_error(message: str) -> str:
+    """Try to turn a cryptic borgmatic/borg/ssh error into something
+    actionable.
+
+    Returns a human-readable hint followed by the original message, or
+    just the original message unchanged if no known pattern matches.
+    """
+    message = message.strip()
+    for pattern, hint in _ERROR_HINTS:
+        if pattern.search(message):
+            return f"{hint}\n\nOriginal error:\n{message}"
+    return message
+
+
+def get_last_error() -> Optional[str]:
+    """Return the (interpreted) error of the most recent run_borgmatic call
+
+    None if the most recent run was successful or borgmatic hasn't run yet.
+    """
+    return _last_error
 
 
 def find_ssh_agent_socket() -> Optional[Path]:
@@ -43,6 +97,7 @@ def borgmatic_environment() -> dict:
 
 def run_borgmatic(c: Config, configname: str = "") -> int:
     """Run borgmatic"""
+    global _last_error
     debug(f"configname: {configname}")
     cmd = c.get_command(configname)
     debug(f"cmd: {cmd}")
@@ -59,10 +114,13 @@ def run_borgmatic(c: Config, configname: str = "") -> int:
             print(result.stdout)
     except OSError as e:
         err(f"borgmatic could not be run: {e}")
+        _last_error = interpret_error(str(e))
         return -1
     except CalledProcessError as e:
         err(f"borgmatic error: {e}")
+        _last_error = interpret_error(e.stderr or str(e))
         return e.returncode
+    _last_error = None
     return result.returncode
 
 

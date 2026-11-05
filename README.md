@@ -12,6 +12,8 @@ Features:
   - **Notifications** (backup started, backup finished)
   - Configuration file to allow customizing the borgmatic command
   - **ssh-agent detection** to enable easy use of password protected ssh keys
+  - **View last error** menu item to inspect the full error message of the
+    last failed backup, with plain-language hints for common causes
 
 Along with it comes a *traycortex-cli* application, that is used in the
 borgmatic hooks configuration to signal the tray icon. Possible states are
@@ -144,6 +146,12 @@ Now you can start traycortex with your usual desktop method.
   - **Engage All**: Run a borgmatic backup
   - **Engage <configuration>**: Run a borgmatic backup for this specific
     configuration
+  - **View last error**: Opens a resizable window showing the full message of
+    the most recent backup error. Known error patterns (e.g. a missing
+    ssh-agent key, DNS or connection failures) are prefixed with a short
+    plain-language explanation of what likely went wrong and how to fix it,
+    followed by the original error message. If no error has occurred since
+    traycortex was started, a notification saying so is shown instead.
   - **Discard**: Quit traycortex and remove the icon from the tray. If a backup
     is currently running, it will be killed.
 

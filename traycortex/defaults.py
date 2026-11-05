@@ -16,6 +16,8 @@ BORGMATIC_COMMAND = "borgmatic"
 MENU_DISCARD = "Discard"
 MENU_ENGAGE_ALL = "All"
 MENU_PREFIX_ENGAGE = "Engage "
+MENU_VIEW_ERROR = "View last error"
+NO_ERROR_RECORDED = "No errors recorded since traycortex started."
 # According to borgmatic source: borgmatic/config/collect.py
 BORGMATIC_YAML_PATHS = [
     Path("/etc/borgmatic/config.yaml"),

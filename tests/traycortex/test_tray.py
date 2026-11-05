@@ -1,5 +1,6 @@
 from multiprocessing.context import AuthenticationError
 from pathlib import Path
+import traycortex.tray as tray
 from traycortex.tray import borgmatic_checker, borgmatic_runner, create_menu, menu_click
 from traycortex.client import TCMessage, send_msg
 from traycortex.defaults import (
@@ -8,12 +9,14 @@ from traycortex.defaults import (
     MSG_JOB_STARTED,
     MSG_JOB_FINISHED,
     MSG_CLOSE,
+    NO_ERROR_RECORDED,
     TITLE_ERROR,
     TITLE_IDLE,
     TITLE_PREFIX_RUNNING,
     MENU_PREFIX_ENGAGE,
     MENU_ENGAGE_ALL,
     MENU_DISCARD,
+    MENU_VIEW_ERROR,
 )
 import threading
 import time
@@ -75,6 +78,7 @@ def test_borgmatic_checker_with_args(populated_config_object, mock_icon):
         "Backup error: some error",
     ]
     assert mock_icon.title == TITLE_ERROR
+    assert tray.last_error == "some error"
 
 
 @pytest.mark.parametrize(
@@ -100,6 +104,10 @@ def test_borgmatic_runner_success(
     # End the thread
     runq.put(False)
     assert mock_icon.notifications == notifications
+    if borgmatic_command == "true":
+        assert tray.last_error is None
+    else:
+        assert tray.last_error is not None
 
 
 def test_create_menu(monkeypatch, populated_config_object):
@@ -127,6 +135,8 @@ def test_create_menu(monkeypatch, populated_config_object):
         f"{MENU_PREFIX_ENGAGE}/test/test.yaml",
         f"{MENU_PREFIX_ENGAGE}/test/test2.yml",
         "- - - -",
+        MENU_VIEW_ERROR,
+        "- - - -",
         MENU_DISCARD,
     ]
 
@@ -136,3 +146,22 @@ def test_menu_click(populated_config_object, mock_icon):
     click_handler = menu_click(runq, populated_config_object)
     click_handler(mock_icon, f"{MENU_PREFIX_ENGAGE}Gookenprien")
     assert runq.get() == "Gookenprien"
+
+
+def test_menu_click_view_error_none(populated_config_object, mock_icon, monkeypatch):
+    monkeypatch.setattr(tray, "last_error", None)
+    runq: "queue.Queue[str]" = queue.Queue()
+    click_handler = menu_click(runq, populated_config_object)
+    click_handler(mock_icon, MENU_VIEW_ERROR)
+    assert mock_icon.notifications == [NO_ERROR_RECORDED]
+
+
+def test_menu_click_view_error_present(populated_config_object, mock_icon, monkeypatch):
+    monkeypatch.setattr(tray, "last_error", "something went wrong")
+    shown_messages = []
+    monkeypatch.setattr(tray, "show_error_dialog", shown_messages.append)
+    runq: "queue.Queue[str]" = queue.Queue()
+    click_handler = menu_click(runq, populated_config_object)
+    click_handler(mock_icon, MENU_VIEW_ERROR)
+    assert shown_messages == ["something went wrong"]
+    assert mock_icon.notifications == []
